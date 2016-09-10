@@ -20,12 +20,11 @@ export default class GameComponent extends Component {
 
   componentDidMount() {
     // 初始化 dom 后开始游戏
-    const isDev = true;
-    this.checkerGame = new Checkers(this.refs.gameCanvas, isDev);
+    this.checkerGame = new Checkers(this.refs.gameCanvas);
+  }
 
-    setTimeout(() => {
-      this.checkerGame.removeEvent();
-    }, 100);
+  componentWillUnmount() {
+    this.checkerGame.destory();
   }
 
   render() {

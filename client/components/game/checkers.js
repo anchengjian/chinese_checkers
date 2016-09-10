@@ -12,6 +12,9 @@ export default class Checkers {
     this.width = canvas.width;
     this.height = canvas.height;
 
+    // 销毁周期队列
+    this._destoryQueue = [];
+
     this.init();
 
   }
@@ -201,12 +204,12 @@ export default class Checkers {
 
   // 点击事件
   initEvents() {
-    this.canvas.addEventListener('click', (ev) => {
+    const clickHandle = (ev) => {
       let point = getPoint(ev);
       let chess = getChessByPoint(point);
       if (chess) return this.isLegalAction(chess);
       return this.clearSelect();
-    }, false);
+    };
 
     const getPoint = (ev) => {
       if (ev.layerX || ev.layerX === 0) return {
@@ -229,12 +232,18 @@ export default class Checkers {
         if (len < this.radius) return chess;
       }
     };
+
+    this.canvas.addEventListener('click', clickHandle, false);
+    this._destoryQueue.push(() => {
+      this.canvas.removeEventListener('click', clickHandle, false);
+    });
   }
 
-  removeEvent() {
-    console.log('remove', this.canvas);
-    for(var i in this.canvas) console.log(i);
-    // this.canvas.removeEventListener('click');
+  destory(cb) {
+    this._destoryQueue.map((v, i) => {
+      if (typeof v === 'function') v();
+    });
+    if (typeof cb === 'function') cb();
   }
 
   setSelect(check) {
