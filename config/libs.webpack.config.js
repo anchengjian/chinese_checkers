@@ -3,7 +3,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const path = require('path');
 const fs = require('fs');
-const indexPath = path.resolve(__dirname, '../src/index.html');
+const indexPath = path.resolve(__dirname, '../client/index.html');
 
 // 同步是为了确保webpack在执行前得到的经过调整的文件
 let indexFile = fs.readFileSync(indexPath, 'utf-8').toString().replace(/\<script\ type\=\"text\/javascript\"\ src\=\"\.\/js\/libs\.js.*?\>\<\/script\>/, '');
@@ -31,8 +31,8 @@ module.exports = {
       name: '[name]'
     }),
     new HtmlWebpackPlugin({
-      filename: '../src/index.html',
-      template: 'raw!./src/index.html',
+      filename: '../client/index.html',
+      template: 'raw!./client/index.html',
       inject: 'body',
       hash: true,
       minify: {

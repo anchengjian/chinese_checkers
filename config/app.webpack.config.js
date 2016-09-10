@@ -99,7 +99,7 @@ let config = {
 const appInfo = require('./app.config.js').appInfo;
 let htmlOptions = Object.assign({}, appInfo, {
   filename: './index.html',
-  template: './src/index.html',
+  template: './client/index.html',
   inject: 'body',
   hash: true,
   minify: {
