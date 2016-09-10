@@ -1,0 +1,38 @@
+*, :after, :before {
+  box-sizing: border-box;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  color: $blank;
+  direction: ltr;
+  overflow-x: hidden;
+  height: 100%;
+  font: 300 14px/1.8 $fontFamily;
+  color: #444;
+}
+
+html, body, ul, ol, h1, h2, h3, h4, h5, h6, p {
+  padding: 0;
+  margin: 0;
+}
+
+article, aside, details, figcaption, figure, footer, header, hgroup, main, menu, nav, section, summary {
+  display: block;
+}
+
+a {
+  text-decoration: none;
+  transition: color ease .3s;
+  color: $primary;
+  cursor: pointer;
+  &:hover {
+    color: $primary-deep;
+  }
+}
+
+::selection {
+  color: #222;
+  background: #d6edff;
+  text-shadow: none;
+}

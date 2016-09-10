@@ -1,0 +1,71 @@
+.animated {
+  animation-duration: 1s;
+  animation-fill-mode: both;
+  &.infinite {
+    animation-iteration-count: infinite;
+  }
+  &.hinge {
+    animation-duration: 2s;
+  }
+  &.bounceIn, &.bounceOut, &.flipOutX, &.flipOutY {
+    animation-duration: .75s
+  }
+  &.delay-500 {
+    animation-delay: .5s;
+  }
+  &.delay-1000 {
+    animation-delay: 1s;
+  }
+  &.delay-1500 {
+    animation-delay: 1.5s;
+  }
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0
+  }
+  100% {
+    opacity: 1
+  }
+}
+
+.fadeIn {
+  animation-name: fadeIn
+}
+
+@keyframes slideInUp {
+  0% {
+    transform: translate3d(0, 100%, 0);
+    visibility: visible
+  }
+  100% {
+    transform: translate3d(0, 0, 0)
+  }
+}
+
+.slideInUp {
+  animation-name: slideInUp
+}
+
+@keyframes tada {
+  0% {
+    transform: scale3d(1, 1, 1)
+  }
+  10%, 20% {
+    transform: scale3d(.9, .9, .9) rotate3d(0, 0, 1, -3deg)
+  }
+  30%, 50%, 70%, 90% {
+    transform: scale3d(1.1, 1.1, 1.1) rotate3d(0, 0, 1, 3deg)
+  }
+  40%, 60%, 80% {
+    transform: scale3d(1.1, 1.1, 1.1) rotate3d(0, 0, 1, -3deg)
+  }
+  100% {
+    transform: scale3d(1, 1, 1)
+  }
+}
+
+.tada {
+  animation-name: tada
+}

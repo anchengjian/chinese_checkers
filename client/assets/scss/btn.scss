@@ -1,0 +1,48 @@
+// 按钮
+.btn {
+  display: inline-block;
+  padding: 5px 15px;
+  line-height: 1.43;
+  font-family: $fontFamily;
+  font-size: $t-m;
+  outline: none;
+  border: none;
+  background-color: $white;
+  color: $blank;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: background-color .3s ease-in-out, color .3s ease-in-out, border-color .3s ease-in-out;
+  &:hover {
+    background-color: $gray-lighter;
+  }
+}
+
+.btn-link {
+  background-color: transparent;
+  color: $primary;
+  &:hover {
+    color: $primary-deep;
+    background-color: transparent;
+  }
+}
+
+.btn-default {}
+
+$btnColorClass: (primary $primary $primary-deep), (success $success $success-deep), (info $info $info-deep), (warning $warning $warning-deep), (danger $danger $danger-deep) !default;
+
+@each $colorClass in $btnColorClass {
+
+  $class: nth($colorClass, 1);
+  $bgColor: nth($colorClass, 2);
+  $hoverBgColor: nth($colorClass, 3);
+
+  .btn-#{$class} {
+    background-color: #{$bgColor};
+    color: $gray-lighter;
+    &:hover {
+      background-color: #{$hoverBgColor};
+      color: $white;
+    }
+  }
+
+}
