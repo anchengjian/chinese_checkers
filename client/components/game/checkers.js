@@ -16,7 +16,6 @@ export default class Checkers {
     this._destoryQueue = [];
 
     this.init();
-
   }
 
   init() {
@@ -202,15 +201,16 @@ export default class Checkers {
     });
   }
 
-  // 点击事件
   initEvents() {
-    const clickHandle = (ev) => {
-      let point = getPoint(ev);
-      let chess = getChessByPoint(point);
-      if (chess) return this.isLegalAction(chess);
-      return this.clearSelect();
-    };
+    let clickHandle = this.clickHandle.bind(this);
+    this.canvas.addEventListener('click', clickHandle, false);
+    this._destoryQueue.push(() => {
+      this.canvas.removeEventListener('click', clickHandle, false);
+    });
+  }
 
+  // 点击事件
+  clickHandle(ev, chess) {
     const getPoint = (ev) => {
       if (ev.layerX || ev.layerX === 0) return {
         x: ev.layerX,
@@ -233,10 +233,14 @@ export default class Checkers {
       }
     };
 
-    this.canvas.addEventListener('click', clickHandle, false);
-    this._destoryQueue.push(() => {
-      this.canvas.removeEventListener('click', clickHandle, false);
-    });
+    let point = getPoint(ev);
+    chess = chess || getChessByPoint(point);
+    if (chess) {
+      let isLegal = this.isLegalAction(chess);
+      if (isLegal && typeof this.palyerMove === 'function') this.palyerMove(ev, chess);
+      return;
+    }
+    return this.clearSelect();
   }
 
   destory(cb) {

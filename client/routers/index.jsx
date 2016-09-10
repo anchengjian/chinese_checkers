@@ -1,13 +1,13 @@
 import { NotFound, Redirect } from 'COMPONENT';
 
-import MainRouter from './game';
+import game from './game';
 import about from './about';
-import user from './user';
+import MainRouter from './user';
 
 // 把 game 游戏界面作为主界面
 MainRouter.childRoutes = [
+  game,
   about,
-  user,
 
   // 强制“刷新”页面的 hack
   { path: 'redirect', component: Redirect },
@@ -21,6 +21,7 @@ export default MainRouter;
 /*
   当前路由树如下
   ├ /
-  |
+  ├ /game
+  ├ /about
   ├ /redirect
 */

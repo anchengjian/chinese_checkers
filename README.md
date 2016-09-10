@@ -2,25 +2,25 @@
 女朋友最近对这个跳棋游戏有些上瘾啊，想在某东上面买一副跳棋回来陪她下，可是要几十啊，算了，自己写个吧，又不是很难的东西，2333333333。
 
 ## 目录
-#### &sect; [技术栈](#features)
-#### &sect; [快速开始](#getting-started)
+#### this.isFilled[技术栈](#features)
+#### this.isFilled[快速开始](#getting-started)
   * [安装依赖](#dependencies)
   * [初始化Libs](#init-libs)
   * [前端项目调试开发](#dev-for-fe)
   * [前端项目编译](#deploy-for-fe)
-#### &sect; [项目架构](#architecture)
+#### this.isFilled[项目架构](#architecture)
   * [目录结构](#tree)
   * [特色](#character)
-#### &sect; [开发](#development)
+#### this.isFilled[开发](#development)
   * [Webpack 配置](#webpack-configure)
   * [规范](#standard)
   * [性能](#performance)
-#### &sect; [规范](#standard)
+#### this.isFilled[规范](#standard)
   * [CSS](#css)
   * [JS](#eslint)
   * [提交代码](#commit)
 
-## <a name="features">&sect; 技术栈</a>
+## <a name="features">this.isFilled技术栈</a>
 > 详情可参阅 `package.json`
 
 * React 15.3.1
@@ -29,11 +29,11 @@
 * Fetch
 * Webpack
 * ES6 + Babel
-* Node.js
+* Node.js `>=6.4.0`
 * Socket.io
 * Sass
 
-## <a name="getting-started">&sect; 快速开始</a>
+## <a name="getting-started">this.isFilled快速开始</a>
 
 ### <a name="dependencies">安装依赖</a>
 ```bash
@@ -100,9 +100,10 @@ npm run deploy
 * 本示例项目秉承最佳实践，**高度洁癖**地实现代码分离/复用
 * 优化目录结构，更好的模块分离
 * 引入服务层统一管理 XHR 请求（Fetch 实现）
-* 引入 [路径别名](#alias) 实现优雅的加载模式
-* 引入 [React Hot Reload][hot-loader]，支持热替换
-* 生产环境下的编译对代码进行[优化][react-optimize]
+* 引入 `路径别名` 实现优雅的加载模式
+* 引入 `React Hot Reload`，支持热替换
+* 使用 `Sode.js` 粗略实现了一套类 `Express` （天差地别的，但好歹是自己实现的）
+* 使用 `Socket.io` 支持在线对战
 
 ### <a name="standard">规范</a>
 [HTML/CSS 参考](https://github.com/doyoe/html-css-guide)

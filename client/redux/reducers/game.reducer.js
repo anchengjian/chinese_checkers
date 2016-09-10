@@ -1,17 +1,32 @@
-import { ADD_INFO, UPDATE_INFO } from 'ACTION/game.action';
+import { ADD, UPDATE, DEL } from 'ACTION/game.action';
 
-export default function(state = {}, action) {
+// 默认A和D角色进行对战
+const gameData = {
+  player: 'A',
+  'A': {
+    // move: [ev, chess]
+  },
+  'D': {
+    // move: [ev, chess]
+  }
+};
+
+export default function(state = gameData, action) {
+  let oldState = Object.assign({}, state);
   switch (action.type) {
 
-    case ADD_INFO:
+    case ADD:
       return Object.assign({}, state, action.payload);
 
-    case UPDATE_INFO:
-      let oldState = state;
+    case DEL:
+      delete oldState[action.key];
+      return oldState;
+
+    case UPDATE:
       oldState[action.key] = action.val;
       return oldState;
 
     default:
-      return state;
+      return oldState;
   }
 }

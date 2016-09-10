@@ -19,8 +19,20 @@ export default class GameComponent extends Component {
   }
 
   componentDidMount() {
+    let game = this.props.game;
     // 初始化 dom 后开始游戏
     this.checkerGame = new Checkers(this.refs.gameCanvas);
+
+    // 自己动了告诉其他人
+    this.checkerGame.palyerMove = (ev, chess) => {
+      this.props.updateGame(game.player, { move: [ev, chess] });
+    };
+  }
+
+  componentWillReceiveProps(nextProps) {
+    console.log(nextProps);
+    // TODO： 接收其他人的消息
+
   }
 
   componentWillUnmount() {
@@ -29,7 +41,6 @@ export default class GameComponent extends Component {
 
   render() {
     return (<section className="game-container">
-        <button className="btn btn-primary">开始游戏</button>
         <div>
           <canvas ref="gameCanvas" className="game-warp" width={ this.canvasRect.width } height={ this.canvasRect.height }></canvas>
         </div>

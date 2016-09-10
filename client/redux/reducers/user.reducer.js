@@ -1,6 +1,10 @@
 import { ADD_INFO, UPDATE_INFO } from 'ACTION/user.action';
 
-export default function(state = {}, action) {
+const userInfo = {
+  name: 233333
+};
+
+export default function(state = userInfo, action) {
   switch (action.type) {
 
     case ADD_INFO:
