@@ -2,8 +2,13 @@ import { Game } from 'COMPONENT';
 import createContainer from 'UTIL/create_container';
 import * as gameAction from 'ACTION/game.action';
 
+import layout from 'VIEW/layout';
+
 export default {
-  path: '/game',
+  path: '/',
+
+  // 全局布局基页
+  component: layout,
 
   indexRoute: {
     getComponent(nextState, cb) {

@@ -10,8 +10,5 @@ export { Header };
 import Redirect from './redirect/redirect';
 export { Redirect };
 
-import UserLogin from './user/login';
-export { UserLogin };
-
 import Game from './game/game';
 export { Game };

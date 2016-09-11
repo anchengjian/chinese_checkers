@@ -7,14 +7,12 @@ if (typeof window !== 'undefined') {
 
   // 全局的xhr
   // https://developer.mozilla.org/zh-CN/docs/Web/API/GlobalFetch/fetch
-  var xhrHeaders = new Headers({
-    'Accept': 'application/json, text/javascript, */*; q=0.01',
-    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
-  });
-
   exports.xhrConfig = {
     method: 'GET',
-    headers: xhrHeaders,
+    headers: {
+      'Accept': 'application/json, text/javascript, */*; q=0.01',
+      'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+    },
     mode: 'cors',
     credentials: 'credentials',
     cache: 'default'

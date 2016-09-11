@@ -7,7 +7,7 @@
     "dev": "webpack-dev-server --hot --devtool --config ./config/app.webpack.config.js --content-base ./dist --host 0.0.0.0 --inline",
     "deploy": "webpack -p --config ./config/app.webpack.config.js",
     "libs": "webpack --config ./config/libs.webpack.config.js",
-    "sever": "node server",
+    "server": "node server",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",

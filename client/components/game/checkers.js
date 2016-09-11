@@ -21,7 +21,7 @@ export default class Checkers {
   init() {
 
     // 棋盘的圆形的半径
-    this.radius = 10;
+    this.radius = ~~(this.width / 35);
 
     // 棋盘的坐标
     this.pos = {
@@ -111,7 +111,7 @@ export default class Checkers {
         ]
       },
       D: {
-        color: '#444',
+        color: '#5badf0',
         has: [
           [10, 14],
           [11, 14],
@@ -225,19 +225,27 @@ export default class Checkers {
 
     const getChessByPoint = (point) => {
       for (let i in this.pos) {
-        let chess = this.pos[i];
-        let a = ~~(point.x - chess._x);
-        let b = ~~(point.y - chess._y);
+        let res = this.pos[i];
+        let a = ~~(point.x - res._x);
+        let b = ~~(point.y - res._y);
         let len = Math.sqrt(a * a + b * b);
-        if (len < this.radius) return chess;
+        if (len < this.radius) return res;
       }
     };
 
-    let point = getPoint(ev);
-    chess = chess || getChessByPoint(point);
+    let isOtherPlayer = false;
+    if (chess) {
+      isOtherPlayer = true;
+      // 转化到本机的棋盘格局
+      chess = this.pos[this.getID(chess)];
+    } else {
+      let point = getPoint(ev);
+      chess = getChessByPoint(point);
+    }
+
     if (chess) {
       let isLegal = this.isLegalAction(chess);
-      if (isLegal && typeof this.palyerMove === 'function') this.palyerMove(ev, chess);
+      if (!isOtherPlayer && typeof this.palyerMove === 'function') this.palyerMove(ev, chess);
       return;
     }
     return this.clearSelect();
@@ -254,7 +262,7 @@ export default class Checkers {
     this.select = check;
     // 绘制表示激活状态的小圆圈
     let nowPos = this.pos[check.ID];
-    this.strokeArc(nowPos._x, nowPos._y, this.radius * 1.1);
+    this.strokeArc(nowPos._x, nowPos._y, this.radius * 1.1, '#000');
   }
 
   clearSelect() {
@@ -337,14 +345,14 @@ export default class Checkers {
     if (check) {
       // 不然则清空选择
       if (this.select) this.clearSelect();
-      return this.setSelect(check);
+      return this.setSelect(check) || true;
     }
 
-    if (!this.select) return;
+    if (!this.select) return false;
 
     // 判断移动是否合法移动
     let oldPos = this.pos[this.select.ID];
-    if (!isLegalMove(oldPos, chess)) return this.clearSelect();
+    if (!isLegalMove(oldPos, chess)) return this.clearSelect() || true;
 
     // 先清除棋盘坐标的填棋子状态
     delete this.filled[this.select.ID];
@@ -364,7 +372,6 @@ export default class Checkers {
   isLegalPosition(x, y) {
     if (x < 1 || x > 17) return false;
     const index = x - 1;
-    console.log(x, index);
     if (y < this.posRegions[index][0] || y > this.posRegions[index][1]) return false;
     return true;
   }
@@ -390,9 +397,10 @@ export default class Checkers {
     this.ctx.fill();
   }
 
-  strokeArc(_x, _y, radius = 10) {
+  strokeArc(_x, _y, radius = 10, color = '#ddd') {
     this.ctx.beginPath();
     this.ctx.arc(_x, _y, radius, startAngle, endAngle, anticlockwise);
+    this.ctx.strokeStyle = color;
     this.ctx.stroke();
   }
 

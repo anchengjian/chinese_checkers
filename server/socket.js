@@ -20,15 +20,18 @@ class Socket {
       socket.on('disconnect', () => log('断开了一个连接', 'socketId=>', socketId));
       socket.on('error', () => log('一个错误了', 'socketId=>', socketId));
 
+      // 无聊,先握手
       socket.on('hello', (msg) => {
         log('一个官方的正式握手');
         socket.emit('word', '666');
       });
+
+      socket.on('SELF_MOVE', (data) => {
+        log('收到一个玩家的运动', data);
+        socket.broadcast.emit('OTHER_MOVE', data);
+        log('转发了消息', data);
+      });
     });
-  }
-  emitToAll(socket = this.io.sockets, eventName, data) {
-    socket.emit(eventName, data);
-    log('返回给客户端一个事件', eventName, data);
   }
 }
 

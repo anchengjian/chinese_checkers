@@ -1,21 +1,21 @@
 import { ADD_INFO, UPDATE_INFO } from 'ACTION/user.action';
 
 const userInfo = {
-  name: 233333
+  name: '233333'
 };
 
 export default function(state = userInfo, action) {
-  switch (action.type) {
+  let oldState = Object.assign({}, state);
 
+  switch (action.type) {
     case ADD_INFO:
-      return Object.assign({}, state, action.payload);
+      return Object.assign(oldState, action.payload);
 
     case UPDATE_INFO:
-      let oldState = state;
       oldState[action.key] = action.val;
       return oldState;
 
     default:
-      return state;
+      return oldState;
   }
 }

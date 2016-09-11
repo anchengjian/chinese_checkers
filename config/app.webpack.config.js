@@ -4,7 +4,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const manifest = require('./manifest.json');
 
-const ip = getIP()[0];
+const ip = getIP()[1];
 const serverPath = `http://${ip}:8080/`;
 const isDev = process.argv[2] === '--hot';
 

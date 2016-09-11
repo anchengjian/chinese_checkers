@@ -4,6 +4,7 @@ import React, { Component } from 'react';
 import notify from 'UTIL/notify';
 
 import Checkers from './checkers';
+import { sendMsg, otherPlayerMove } from 'SERVICE/socket.service';
 
 export default class GameComponent extends Component {
   constructor() {
@@ -25,12 +26,17 @@ export default class GameComponent extends Component {
 
     // 自己动了告诉其他人
     this.checkerGame.palyerMove = (ev, chess) => {
-      this.props.updateGame(game.player, { move: [ev, chess] });
+      // this.props.updateGame(game.player, [ev, chess]);
+      sendMsg(game.player, [ev, chess]);
     };
+
+    otherPlayerMove((player, move) => {
+      this.checkerGame.clickHandle(...move);
+    });
   }
 
   componentWillReceiveProps(nextProps) {
-    console.log(nextProps);
+    // console.log(nextProps);
     // TODO： 接收其他人的消息
 
   }
@@ -40,10 +46,12 @@ export default class GameComponent extends Component {
   }
 
   render() {
-    return (<section className="game-container">
+    return (
+      <section className="game-container">
         <div>
           <canvas ref="gameCanvas" className="game-warp" width={ this.canvasRect.width } height={ this.canvasRect.height }></canvas>
         </div>
-      </section>);
+      </section>
+    );
   }
 };
