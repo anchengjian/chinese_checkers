@@ -14,11 +14,6 @@
   * [目录结构](#tree)
   * [特色](#character)
 
-#### [开发](#development)
-  * [Webpack 配置](#webpack-configure)
-  * [规范](#standard)
-  * [性能](#performance)
-
 #### [规范](#standard)
   * [CSS](#css)
   * [JS](#eslint)
@@ -114,7 +109,7 @@ npm run server
 * 使用 `Sode.js` 粗略实现了一套类 `Express` （天差地别的，但好歹是自己实现的）
 * 使用 `Socket.io` 支持在线对战
 
-### <a name="standard">规范</a>
+## <a name="standard">规范</a>
 [HTML/CSS 参考](https://github.com/doyoe/html-css-guide)
 
 ### <a name="css">CSS</a>
