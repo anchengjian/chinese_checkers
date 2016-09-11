@@ -8,13 +8,17 @@
   * [初始化Libs](#init-libs)
   * [前端项目调试开发](#dev-for-fe)
   * [前端项目编译](#deploy-for-fe)
+  * [服务端](#dev-for-server)
+
 #### [项目架构](#architecture)
   * [目录结构](#tree)
   * [特色](#character)
+
 #### [开发](#development)
   * [Webpack 配置](#webpack-configure)
   * [规范](#standard)
   * [性能](#performance)
+
 #### [规范](#standard)
   * [CSS](#css)
   * [JS](#eslint)
@@ -61,6 +65,11 @@ npm run dev
 npm run deploy
 ```
 
+### <a name="dev-for-server">服务端 </a>
+```bash
+npm run server
+```
+
 ## <a name="architecture">目录架构 </a>
 ### <a name="tree">目录 </a>
 ```
@@ -97,7 +106,7 @@ npm run deploy
 ```
 
 ### <a name="character">特色</a>
-* 本示例项目秉承最佳实践，**高度洁癖**地实现代码分离/复用
+* 本示例项目秉承最佳实践，地实现代码分离/复用
 * 优化目录结构，更好的模块分离
 * 引入服务层统一管理 XHR 请求（Fetch 实现）
 * 引入 `路径别名` 实现优雅的加载模式
@@ -118,13 +127,13 @@ npm run deploy
 ### <a name="commit">提交代码</a>
 [commit](http://www.ruanyifeng.com/blog/2016/01/commit_message_change_log.html)
 ####Type explain
->feat     | 新功能
->fix      | 修补bug
->docs     | 文档(documentation)
->style    | 格式(不影响代码运行的变动)
->refactor | 重构(即不是新增功能，也不是修改bug的代码变动)
->test     | 增加测试
->chore    | 构建过程或辅助工具的变动
+>feat     | 新功能   
+>fix      | 修补bug   
+>docs     | 文档(documentation)   
+>style    | 格式(不影响代码运行的变动)   
+>refactor | 重构(即不是新增功能，也不是修改bug的代码变动)   
+>test     | 增加测试   
+>chore    | 构建过程或辅助工具的变动   
 
 ####Example
 ```bash
