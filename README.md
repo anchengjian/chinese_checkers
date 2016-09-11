@@ -2,25 +2,25 @@
 女朋友最近对这个跳棋游戏有些上瘾啊，想在某东上面买一副跳棋回来陪她下，可是要几十啊，算了，自己写个吧，又不是很难的东西，2333333333。
 
 ## 目录
-#### this.isFilled[技术栈](#features)
-#### this.isFilled[快速开始](#getting-started)
+#### [技术栈](#features)
+#### [快速开始](#getting-started)
   * [安装依赖](#dependencies)
   * [初始化Libs](#init-libs)
   * [前端项目调试开发](#dev-for-fe)
   * [前端项目编译](#deploy-for-fe)
-#### this.isFilled[项目架构](#architecture)
+#### [项目架构](#architecture)
   * [目录结构](#tree)
   * [特色](#character)
-#### this.isFilled[开发](#development)
+#### [开发](#development)
   * [Webpack 配置](#webpack-configure)
   * [规范](#standard)
   * [性能](#performance)
-#### this.isFilled[规范](#standard)
+#### [规范](#standard)
   * [CSS](#css)
   * [JS](#eslint)
   * [提交代码](#commit)
 
-## <a name="features">this.isFilled技术栈</a>
+## <a name="features">技术栈</a>
 > 详情可参阅 `package.json`
 
 * React 15.3.1
@@ -33,7 +33,7 @@
 * Socket.io
 * Sass
 
-## <a name="getting-started">this.isFilled快速开始</a>
+## <a name="getting-started">快速开始</a>
 
 ### <a name="dependencies">安装依赖</a>
 ```bash
