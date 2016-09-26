@@ -27,9 +27,9 @@ class Socket {
       });
 
       socket.on('SELF_MOVE', (data) => {
-        log('收到一个玩家的运动', data);
+        // log('收到一个玩家的运动', data);
         socket.broadcast.emit('OTHER_MOVE', data);
-        log('转发了消息', data);
+        // log('转发了消息', data);
       });
     });
   }

@@ -1,3 +1,4 @@
+// 全局的圆圈指令变量
 let startAngle = 0;
 let endAngle = 2 * Math.PI;
 let anticlockwise = true;
@@ -15,13 +16,17 @@ export default class Checkers {
     // 销毁周期队列
     this._destoryQueue = [];
 
-    this.init();
-  }
+    // 棋盘的圆形的半径，31 这个是调出来的，没有缘由
+    this.radius = ~~(this.width / 31);
 
-  init() {
+    // 默认的棋盘圆圈的边框颜色
+    this.borderColor = '#ddd';
 
-    // 棋盘的圆形的半径
-    this.radius = ~~(this.width / 35);
+    // 默认的填充颜色
+    this.backgroundColor = '#fff';
+
+    // 被激活的棋子的边框颜色
+    this.activeBorderColor = '#000';
 
     // 棋盘的坐标
     this.pos = {
@@ -35,7 +40,7 @@ export default class Checkers {
 
     // 棋盘中被填棋子的坐标集合
     this.filled = {
-      // ID: {
+      // '1-5': {
       //   ID: '1-5',
       //   palyerId: 'A',
       //   index: 0
@@ -67,7 +72,7 @@ export default class Checkers {
     this.players = {
       A: {
         color: 'rgba(255, 165, 0, 1)',
-        has: [
+        pieces: [
           [5, 1],
           [5, 2],
           [5, 3],
@@ -82,7 +87,7 @@ export default class Checkers {
       },
       B: {
         color: 'rgba(0, 255, 0, 0.25)',
-        has: [
+        pieces: [
           [10, 5],
           [11, 5],
           [12, 5],
@@ -97,7 +102,7 @@ export default class Checkers {
       },
       C: {
         color: '#444',
-        has: [
+        pieces: [
           [14, 10],
           [14, 11],
           [15, 11],
@@ -112,7 +117,7 @@ export default class Checkers {
       },
       D: {
         color: '#5badf0',
-        has: [
+        pieces: [
           [10, 14],
           [11, 14],
           [12, 14],
@@ -127,7 +132,7 @@ export default class Checkers {
       },
       E: {
         color: '#777',
-        has: [
+        pieces: [
           [5, 10],
           [5, 11],
           [6, 11],
@@ -142,7 +147,7 @@ export default class Checkers {
       },
       F: {
         color: '#000',
-        has: [
+        pieces: [
           [1, 5],
           [2, 5],
           [3, 5],
@@ -157,50 +162,61 @@ export default class Checkers {
       }
     };
 
-    this.initBoard();
-    this.initChess('A');
-    this.initChess('D');
+    this.init();
+  }
+
+  init() {
+
+    this.drawBoard();
+
+    this.initPlayer('A');
+    this.initPlayer('D');
 
     this.initEvents();
   }
 
-  initBoard() {
-
-    const lineHeight = this.width / 14;
-    const sapceX = lineHeight / 2;
-    const padding = 20;
+  // 初始化棋盘，一个巨大的六角形东西
+  drawBoard() {
+    const spaceWidth = this.width / 14;
+    const lineHeight = this.width / 15;
+    const sapceX = spaceWidth / 2;
+    const padding = 2 * this.radius;
 
     this.posRegions.forEach((regions, i) => {
       let x = i + 1;
       let min = regions[0];
       let max = regions[1];
       for (let y = min; y <= max; y++) {
-        // 需要修正一下 x 轴的距离
+        // 需要修正一下 x 轴的实际坐标
         let correct = 0;
         if (y < 5) correct = (5 - y) * sapceX;
         if (y > 5) correct = -(y - 5) * sapceX;
-        let _x = i * lineHeight + correct + padding;
+
+        let _x = i * spaceWidth + correct + padding;
         let _y = y * lineHeight;
-        this.strokeArc(_x, _y, this.radius);
+        this.strokeArc(_x, _y);
         let ID = this.getID(x, y);
-        this.pos[ID] = { x, y, _x, _y };
+        this.pos[ID] = { x, y, _x, _y, ID };
         // this.ctx.fillText(ID, _x - 15, _y + 5);
       }
     });
   }
 
-  initChess(palyerId) {
+  // 根据角色初始化玩家的棋子
+  initPlayer(palyerId) {
     if (!this.players.hasOwnProperty(palyerId)) return;
     let palyer = this.players[palyerId];
-    palyer.has.forEach((point, index) => {
+    palyer.pieces.forEach((point, index) => {
       let ID = this.getID(...point);
-      let pos = this.pos[ID];
+      let oldPos = null;
+      let newPos = this.pos[ID];
+      let fillData = { ID, palyerId, index };
       // 记录
-      this.filled[ID] = { ID, palyerId, index };
-      this.fillArc(pos._x, pos._y, this.radius * 1.2, palyer.color);
+      this.setFill(newPos, oldPos, fillData);
     });
   }
 
+  // 初始化事件监听
   initEvents() {
     let clickHandle = this.clickHandle.bind(this);
     this.canvas.addEventListener('click', clickHandle, false);
@@ -209,48 +225,7 @@ export default class Checkers {
     });
   }
 
-  // 点击事件
-  clickHandle(ev, chess) {
-    const getPoint = (ev) => {
-      if (ev.layerX || ev.layerX === 0) return {
-        x: ev.layerX,
-        y: ev.layerY
-      };
-      // Opera
-      if (ev.offsetX || ev.offsetX === 0) return {
-        x: ev.offsetX,
-        y: ev.offsetY
-      };
-    };
-
-    const getChessByPoint = (point) => {
-      for (let i in this.pos) {
-        let res = this.pos[i];
-        let a = ~~(point.x - res._x);
-        let b = ~~(point.y - res._y);
-        let len = Math.sqrt(a * a + b * b);
-        if (len < this.radius) return res;
-      }
-    };
-
-    let isOtherPlayer = false;
-    if (chess) {
-      isOtherPlayer = true;
-      // 转化到本机的棋盘格局
-      chess = this.pos[this.getID(chess)];
-    } else {
-      let point = getPoint(ev);
-      chess = getChessByPoint(point);
-    }
-
-    if (chess) {
-      let isLegal = this.isLegalAction(chess);
-      if (!isOtherPlayer && typeof this.palyerMove === 'function') this.palyerMove(ev, chess);
-      return;
-    }
-    return this.clearSelect();
-  }
-
+  // 销毁方法
   destory(cb) {
     this._destoryQueue.map((v, i) => {
       if (typeof v === 'function') v();
@@ -258,155 +233,175 @@ export default class Checkers {
     if (typeof cb === 'function') cb();
   }
 
-  setSelect(check) {
-    this.select = check;
-    // 绘制表示激活状态的小圆圈
-    let nowPos = this.pos[check.ID];
-    this.strokeArc(nowPos._x, nowPos._y, this.radius * 1.1, '#000');
+  // canvas 中的点击事件回调
+  clickHandle(ev, piece) {
+
+    let isOtherPlayer = false;
+    if (piece) {
+      isOtherPlayer = true;
+      // 转化到本机的棋盘格局
+      piece = this.pos[this.getID(piece)];
+    } else {
+      let point = this.getPointByEvent(ev);
+      piece = this.getPieceByPoint(point);
+    }
+
+    // 如果没有获得真实可用的棋子则退出
+    if (!piece) return;
+
+    // 如果检测到的落子之前已经有一个已经选中的棋子，则进行走棋检测，不然进行激活棋子的检测
+    if (this.activePiece) {
+      if (this.isLegalAction(piece)) this.renderMove(piece);
+    } else {
+      this.setActive(piece);
+    }
+
+    // callback
+    if (!isOtherPlayer && typeof this.palyerMove === 'function') this.palyerMove(ev, piece);
   }
 
-  clearSelect() {
-    if (this.select) {
+  // 设置激活，黑圈圈的高亮
+  setActive(piece) {
+    this.activePiece = piece;
+    // 绘制表示激活状态的小圆圈
+    let nowPos = this.pos[piece.ID];
+    this.strokeArc(nowPos._x, nowPos._y, this.activeBorderColor);
+  }
+
+  // 取消激活，取消黑圈圈的高亮
+  clearActive() {
+    if (this.activePiece) {
       // 先清理
-      let oldPos = this.pos[this.select.ID];
-      this.cleanArc(oldPos._x, oldPos._y, this.radius);
+      let oldPos = this.pos[this.activePiece.ID];
+      this.cleanArc(oldPos._x, oldPos._y);
       // 如果之前是被填充的，继续填充一个颜色
       let check = this.isFilled(oldPos);
-      if (check) this.fillArc(oldPos._x, oldPos._y, this.radius, this.players[check.palyerId].color);
+      if (check) this.fillArc(oldPos._x, oldPos._y, this.players[check.palyerId].color);
     }
-    this.select = null;
+    this.activePiece = null;
   }
 
-  // 获得当前棋子的周围棋子
-  getJoint(x, y) {
-    if (!this.isLegalPosition(x, y)) return;
-    const preX = x - 1;
-    const nextX = x + 1;
-    const preY = y - 1;
-    const nextY = y + 1;
-    return {
-      topLeft: { x: preX, y: preY },
-      right: { x: nextX, y: y },
-      bottomRight: { x: nextX, y: nextY },
-      bottomLeft: { x: x, y: nextY },
-      left: { x: preX, y: y },
-      topRight: { x: x, y: preY }
-    };
+  // 设置填充效果
+  setFill(newPos, oldPos, fillData) {
+    if (!fillData) {
+      let oldID = this.getID(oldPos);
+      let nowID = this.getID(newPos);
+      fillData = Object.assign({}, this.filled[oldID], { ID: nowID });
+    }
+    this.filled[fillData.ID] = fillData;
+    this.fillArc(newPos._x, newPos._y, this.players[fillData.palyerId].color);
+  }
+
+  // 取消填充效果
+  clearFill(piece) {
+    let oldPos = this.pos[piece.ID];
+    delete this.filled[this.activePiece.ID];
+    this.cleanArc(oldPos._x, oldPos._y);
+  }
+
+  renderMove(piece) {
+
+    this.setFill(piece, this.activePiece);
+    this.clearFill(this.activePiece);
+
+    this.clearActive();
+    this.setActive(piece);
+  }
+
+  // 通过event事件获得点击的坐标
+  getPointByEvent(ev) {
+    if (ev.layerX || ev.layerX === 0) return { x: ev.layerX, y: ev.layerY };
+    // Opera
+    if (ev.offsetX || ev.offsetX === 0) return { x: ev.offsetX, y: ev.offsetY };
+  }
+
+  // 通过某坐标找出其是否属于一个棋子／棋盘区域内
+  getPieceByPoint(point) {
+    for (let i in this.pos) {
+      let res = this.pos[i];
+      let a = ~~(point.x - res._x);
+      let b = ~~(point.y - res._y);
+      let len = Math.sqrt(a * a + b * b);
+      if (len < this.radius) return res;
+    }
   }
 
   // 检测当前落子是否符合规则
-  isLegalAction(chess) {
-    const noFilledByPath = (oldPos, newPos) => {
-      let steps = {
-        x: newPos.x - oldPos.x,
-        y: newPos.y - oldPos.y
-      };
-      let midPos = {
-        x: oldPos.x + steps.x / 2,
-        y: oldPos.y + steps.y / 2
-      };
-      if (this.isFilled(midPos)) return false;
+  isLegalAction(newPos, oldPos = this.activePiece) {
 
-      let maxInXY = Math.max(Math.abs(steps.x), Math.abs(steps.y));
-      if (maxInXY <= 2) return true;
-      // 递归
-      return noFilledByPath(oldPos, midPos) && noFilledByPath(midPos, newPos);
-    };
+    // 判断当前的移动点piece是否是可以移动的
+    // 如果目标位置被填充了肯定不能移动
+    if (!newPos || this.isFilled(newPos)) return;
 
-    const isLegalMove = (oldPos, newPos) => {
-      let steps = {
-        x: newPos.x - oldPos.x,
-        y: newPos.y - oldPos.y
-      };
+    let canMove = this.getPosByCanMove(oldPos);
 
-      // 先检查移动的倾斜角度, tan 值只能为 0 或者 1, 详情看文档
-      let deg = ~~(steps.y / steps.x);
-      if (deg !== 0 && deg !== 1) return false;
-
-      // 只移动一步，目标没有被填充 => 正确
-      let maxInXY = Math.max(Math.abs(steps.x), Math.abs(steps.y));
-      if (maxInXY === 1) return !this.isFilled(newPos);
-
-      let midPos = {
-        x: oldPos.x + steps.x / 2,
-        y: oldPos.y + steps.y / 2
-      };
-      // 中间棋子没有被填充 => 当然错误
-      if (!this.isFilled(midPos)) return false;
-      if (maxInXY <= 2) return true;
-
-      // 这儿需要递归的查找当前经过的每一个位置的填充状况
-      return noFilledByPath(oldPos, midPos) && noFilledByPath(midPos, newPos);
-    };
-
-    // 主逻辑
-    let check = this.isFilled(chess);
-    // 得到触发的坐标是否被填了棋子，如果是则设置激活选中
-    if (check) {
-      // 不然则清空选择
-      if (this.select) this.clearSelect();
-      return this.setSelect(check) || true;
+    for (let i in canMove) {
+      if (canMove[i].ID === newPos.ID) return true;
     }
-
-    if (!this.select) return false;
-
-    // 判断移动是否合法移动
-    let oldPos = this.pos[this.select.ID];
-    if (!isLegalMove(oldPos, chess)) return this.clearSelect() || true;
-
-    // 先清除棋盘坐标的填棋子状态
-    delete this.filled[this.select.ID];
-    this.cleanArc(oldPos._x, oldPos._y, this.radius);
-
-    // 设置当前棋子的新的棋盘坐标
-    let nowID = this.getID(chess);
-    this.filled[nowID] = Object.assign({}, this.select, { ID: nowID });
-
-    // 假设已经不可以连续跳了
-    let selectChess = this.pos[nowID];
-    this.fillArc(chess._x, chess._y, this.radius, this.players[this.select.palyerId].color);
-    this.clearSelect();
   }
 
-  // 检查当前的棋子坐标是否在棋盘内
-  isLegalPosition(x, y) {
-    if (x < 1 || x > 17) return false;
-    const index = x - 1;
-    if (y < this.posRegions[index][0] || y > this.posRegions[index][1]) return false;
-    return true;
+  getPosByCanMove(piece) {
+    return this.getNear(piece);
+  }
+
+  // 获得当前棋子的周围棋子
+  getNear(piece) {
+    // if (!this.isLegalPosition(x, y)) return;
+    const preX = piece.x - 1;
+    const nextX = piece.x + 1;
+    const preY = piece.y - 1;
+    const nextY = piece.y + 1;
+    let res = {
+      topLeft: { x: preX, y: preY },
+      right: { x: nextX, y: piece.y },
+      bottomRight: { x: nextX, y: nextY },
+      bottomLeft: { x: piece.x, y: nextY },
+      left: { x: preX, y: piece.y },
+      topRight: { x: piece.x, y: preY }
+    };
+
+    for (let i in res) {
+      let ID = this.getID(res[i]);
+      if (!this.pos[ID]) {
+        delete res[i];
+      } else {
+        res[i] = this.pos[ID];
+      }
+    }
+    return res;
   }
 
   // 检查当前坐标是否落子了
-  isFilled(chess) {
-    return this.filled[this.getID(chess)];
-  }
-
-  cleanArc(_x = 10, _y = 10, radius = 10) {
-    // 先清除
-    this.ctx.globalCompositeOperation = 'destination-out';
-    this.fillArc(_x, _y, radius * 1.2);
-    this.ctx.globalCompositeOperation = 'source-over';
-    // 再描边
-    this.strokeArc(_x, _y, radius);
-  }
-
-  fillArc(_x = 10, _y = 10, radius = 10, color = 'rgb(255, 255, 255)') {
-    this.ctx.beginPath();
-    this.ctx.arc(_x, _y, radius, startAngle, endAngle, anticlockwise);
-    this.ctx.fillStyle = color;
-    this.ctx.fill();
-  }
-
-  strokeArc(_x, _y, radius = 10, color = '#ddd') {
-    this.ctx.beginPath();
-    this.ctx.arc(_x, _y, radius, startAngle, endAngle, anticlockwise);
-    this.ctx.strokeStyle = color;
-    this.ctx.stroke();
+  isFilled(piece) {
+    return this.filled[this.getID(piece)];
   }
 
   // 全局统一的ID样式
   getID(x, y) {
     if (Object.prototype.toString.call(x) === '[object Object]') return `${x.x}-${x.y}`;
     return `${x}-${y}`;
+  }
+
+  cleanArc(_x = 10, _y = 10, radius = this.radius) {
+    // 先清除
+    this.ctx.globalCompositeOperation = 'destination-out';
+    this.fillArc(_x, _y, radius * 1.1);
+    this.ctx.globalCompositeOperation = 'source-over';
+    // 再描边
+    this.strokeArc(_x, _y, this.borderColor, radius);
+  }
+
+  fillArc(_x = 10, _y = 10, color = this.backgroundColor, radius = this.radius) {
+    this.ctx.beginPath();
+    this.ctx.arc(_x, _y, radius, startAngle, endAngle, anticlockwise);
+    this.ctx.fillStyle = color;
+    this.ctx.fill();
+  }
+
+  strokeArc(_x, _y, color = this.borderColor, radius = this.radius) {
+    this.ctx.beginPath();
+    this.ctx.arc(_x, _y, radius, startAngle, endAngle, anticlockwise);
+    this.ctx.strokeStyle = color;
+    this.ctx.stroke();
   }
 }

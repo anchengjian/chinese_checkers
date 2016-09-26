@@ -137,3 +137,7 @@ git commit -m "<type>(<scope>): <subject>"
 git commit -m 'docs: 增加了git msg规范'
 ```
 
+###包含功能
+* 重来
+* 悔棋
+
