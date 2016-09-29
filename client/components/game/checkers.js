@@ -49,8 +49,8 @@ export default class Checkers {
 
     // 坐标系区域的限制
     this.posRegions = [
-      [5, 5], // y坐标为1，x的上限是5，下限是5
-      [5, 6], // y坐标为2，x的上限是5，下限是6
+      [5, 5], // x坐标为1，y的上限是5，下限是5
+      [5, 6], // x坐标为2，y的上限是5，下限是6
       [5, 7],
       [5, 8],
       [1, 13],
@@ -299,8 +299,8 @@ export default class Checkers {
     this.cleanArc(oldPos._x, oldPos._y);
   }
 
+  // 描绘棋子移动
   renderMove(piece) {
-
     this.setFill(piece, this.activePiece);
     this.clearFill(this.activePiece);
 
