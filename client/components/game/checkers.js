@@ -10,23 +10,22 @@ export default class Checkers {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
 
-    this.width = canvas.width;
-    this.height = canvas.height;
-
     // 销毁周期队列
     this._destoryQueue = [];
 
-    // 棋盘的圆形的半径，31 这个是调出来的，没有缘由
-    this.radius = ~~(this.width / 31);
-
-    // 默认的棋盘圆圈的边框颜色
-    this.borderColor = '#ddd';
-
-    // 默认的填充颜色
-    this.backgroundColor = '#fff';
-
-    // 被激活的棋子的边框颜色
-    this.activeBorderColor = '#000';
+    // style and config
+    this.config = {
+      width: canvas.width,
+      height: canvas.height,
+      // 棋盘的圆形的半径，31 这个是调出来的，没有缘由
+      radius: ~~(canvas.width / 31),
+      // 默认的棋盘圆圈的边框颜色
+      borderColor: '#ddd',
+      // 默认的填充颜色
+      backgroundColor: '#fff',
+      // 被激活的棋子的边框颜色
+      activeBorderColor: '#000'
+    };
 
     // 棋盘的坐标
     this.pos = {
@@ -38,17 +37,63 @@ export default class Checkers {
       // }
     };
 
-    // 棋盘中被填棋子的坐标集合
+    // 数据结构，棋盘中被填棋子的坐标集合
     this.filled = {
       // '1-5': {
       //   ID: '1-5',
-      //   palyerId: 'A',
-      //   index: 0
+      //   palyerId: 'A'
       // }
     };
 
+    // 初始化的棋盘的6个区域内的坐标限制
+    this.players = {
+      A: {
+        color: 'rgba(255, 165, 0, 1)',
+        area: { x: [5, 8], y: [1, 4] }
+      },
+      B: {
+        color: 'rgba(0, 255, 0, 0.25)',
+        area: { x: [10, 13], y: [5, 8] }
+      },
+      C: {
+        color: '#f44336',
+        area: { x: [14, 17], y: [10, 13] }
+      },
+      D: {
+        color: '#5badf0',
+        area: { x: [10, 13], y: [14, 17] }
+      },
+      E: {
+        color: '#e91e63',
+        area: { x: [5, 8], y: [10, 13] }
+      },
+      F: {
+        color: '#ff9800',
+        area: { x: [1, 4], y: [5, 8] }
+      }
+    };
+
+    this.init();
+  }
+
+  init() {
+    this.drawBoard();
+
+    this.initPlayer('A');
+    this.initPlayer('D');
+
+    this.initEvents();
+  }
+
+  // 初始化棋盘，一个巨大的六角形东西
+  drawBoard() {
+    const spaceWidth = this.config.width / 14;
+    const lineHeight = this.config.width / 15;
+    const sapceX = spaceWidth / 2;
+    const padding = 2 * this.config.radius;
+
     // 坐标系区域的限制
-    this.posRegions = [
+    const posRegions = [
       [5, 5], // x坐标为1，y的上限是5，下限是5
       [5, 6], // x坐标为2，y的上限是5，下限是6
       [5, 7],
@@ -68,121 +113,7 @@ export default class Checkers {
       [13, 13]
     ];
 
-    // 初始化的棋盘的6个区域内的坐标限制
-    this.players = {
-      A: {
-        color: 'rgba(255, 165, 0, 1)',
-        pieces: [
-          [5, 1],
-          [5, 2],
-          [5, 3],
-          [5, 4],
-          [6, 2],
-          [6, 3],
-          [6, 4],
-          [7, 3],
-          [7, 4],
-          [8, 4]
-        ]
-      },
-      B: {
-        color: 'rgba(0, 255, 0, 0.25)',
-        pieces: [
-          [10, 5],
-          [11, 5],
-          [12, 5],
-          [13, 5],
-          [11, 6],
-          [12, 6],
-          [13, 6],
-          [12, 7],
-          [13, 7],
-          [13, 8]
-        ]
-      },
-      C: {
-        color: '#444',
-        pieces: [
-          [14, 10],
-          [14, 11],
-          [15, 11],
-          [14, 12],
-          [15, 12],
-          [16, 12],
-          [14, 13],
-          [15, 13],
-          [16, 13],
-          [17, 13]
-        ]
-      },
-      D: {
-        color: '#5badf0',
-        pieces: [
-          [10, 14],
-          [11, 14],
-          [12, 14],
-          [13, 14],
-          [11, 15],
-          [12, 15],
-          [13, 15],
-          [12, 16],
-          [13, 16],
-          [13, 17]
-        ]
-      },
-      E: {
-        color: '#777',
-        pieces: [
-          [5, 10],
-          [5, 11],
-          [6, 11],
-          [5, 12],
-          [6, 12],
-          [7, 12],
-          [5, 13],
-          [6, 13],
-          [7, 13],
-          [8, 13]
-        ]
-      },
-      F: {
-        color: '#000',
-        pieces: [
-          [1, 5],
-          [2, 5],
-          [3, 5],
-          [4, 5],
-          [2, 6],
-          [3, 6],
-          [4, 6],
-          [3, 7],
-          [4, 7],
-          [4, 8]
-        ]
-      }
-    };
-
-    this.init();
-  }
-
-  init() {
-
-    this.drawBoard();
-
-    this.initPlayer('A');
-    this.initPlayer('D');
-
-    this.initEvents();
-  }
-
-  // 初始化棋盘，一个巨大的六角形东西
-  drawBoard() {
-    const spaceWidth = this.width / 14;
-    const lineHeight = this.width / 15;
-    const sapceX = spaceWidth / 2;
-    const padding = 2 * this.radius;
-
-    this.posRegions.forEach((regions, i) => {
+    posRegions.forEach((regions, i) => {
       let x = i + 1;
       let min = regions[0];
       let max = regions[1];
@@ -191,10 +122,12 @@ export default class Checkers {
         let correct = 0;
         if (y < 5) correct = (5 - y) * sapceX;
         if (y > 5) correct = -(y - 5) * sapceX;
-
         let _x = i * spaceWidth + correct + padding;
         let _y = y * lineHeight;
+
+        // 画棋盘
         this.strokeArc(_x, _y);
+        // 记录位置
         let ID = this.getID(x, y);
         this.pos[ID] = { x, y, _x, _y, ID };
         // this.ctx.fillText(ID, _x - 15, _y + 5);
@@ -206,14 +139,20 @@ export default class Checkers {
   initPlayer(palyerId) {
     if (!this.players.hasOwnProperty(palyerId)) return;
     let palyer = this.players[palyerId];
-    palyer.pieces.forEach((point, index) => {
-      let ID = this.getID(...point);
-      let oldPos = null;
-      let newPos = this.pos[ID];
-      let fillData = { ID, palyerId, index };
-      // 记录
-      this.setFill(newPos, oldPos, fillData);
-    });
+
+    for (let x = palyer.area.x[0]; x <= palyer.area.x[1]; x++) {
+      for (let y = palyer.area.y[0]; y <= palyer.area.y[1]; y++) {
+
+        let ID = this.getID(x, y);
+        let newPos = this.pos[ID];
+        if (!newPos) continue;
+
+        let oldPos = null;
+        let fillData = { ID, palyerId };
+        // 记录
+        this.setFill(newPos, oldPos, fillData);
+      }
+    }
   }
 
   // 初始化事件监听
@@ -263,9 +202,10 @@ export default class Checkers {
   // 设置激活，黑圈圈的高亮
   setActive(piece) {
     this.activePiece = piece;
+    console.log(piece);
     // 绘制表示激活状态的小圆圈
     let nowPos = this.pos[piece.ID];
-    this.strokeArc(nowPos._x, nowPos._y, this.activeBorderColor);
+    this.strokeArc(nowPos._x, nowPos._y, this.config.activeBorderColor);
   }
 
   // 取消激活，取消黑圈圈的高亮
@@ -322,7 +262,7 @@ export default class Checkers {
       let a = ~~(point.x - res._x);
       let b = ~~(point.y - res._y);
       let len = Math.sqrt(a * a + b * b);
-      if (len < this.radius) return res;
+      if (len < this.config.radius) return res;
     }
   }
 
@@ -345,21 +285,27 @@ export default class Checkers {
   }
 
   // 获得当前棋子的周围棋子
-  getNear(piece) {
-    // if (!this.isLegalPosition(x, y)) return;
-    const preX = piece.x - 1;
-    const nextX = piece.x + 1;
-    const preY = piece.y - 1;
-    const nextY = piece.y + 1;
+  getNear(x = 1, y = 1) {
+    // 传参特殊处理
+    if (Object.prototype.toString.call(x) === '[object Object]') {
+      y = x.y;
+      x = x.x;
+    } else if (Object.prototype.toString.call(x) === '[object Array]') {
+      y = x[1];
+      x = x[0];
+    }
+
+    // 计算
     let res = {
-      topLeft: { x: preX, y: preY },
-      right: { x: nextX, y: piece.y },
-      bottomRight: { x: nextX, y: nextY },
-      bottomLeft: { x: piece.x, y: nextY },
-      left: { x: preX, y: piece.y },
-      topRight: { x: piece.x, y: preY }
+      topLeft: { x: x - 1, y: y - 1 },
+      right: { x: x + 1, y: y },
+      bottomRight: { x: x + 1, y: y + 1 },
+      bottomLeft: { x: x, y: y + 1 },
+      left: { x: x - 1, y: y },
+      topRight: { x: x, y: y - 1 }
     };
 
+    // 检查正确点
     for (let i in res) {
       let ID = this.getID(res[i]);
       if (!this.pos[ID]) {
@@ -382,23 +328,23 @@ export default class Checkers {
     return `${x}-${y}`;
   }
 
-  cleanArc(_x = 10, _y = 10, radius = this.radius) {
+  cleanArc(_x = 10, _y = 10, radius = this.config.radius) {
     // 先清除
     this.ctx.globalCompositeOperation = 'destination-out';
     this.fillArc(_x, _y, radius * 1.1);
     this.ctx.globalCompositeOperation = 'source-over';
     // 再描边
-    this.strokeArc(_x, _y, this.borderColor, radius);
+    this.strokeArc(_x, _y, this.config.borderColor, radius);
   }
 
-  fillArc(_x = 10, _y = 10, color = this.backgroundColor, radius = this.radius) {
+  fillArc(_x = 10, _y = 10, color = this.config.backgroundColor, radius = this.config.radius) {
     this.ctx.beginPath();
     this.ctx.arc(_x, _y, radius, startAngle, endAngle, anticlockwise);
     this.ctx.fillStyle = color;
     this.ctx.fill();
   }
 
-  strokeArc(_x, _y, color = this.borderColor, radius = this.radius) {
+  strokeArc(_x, _y, color = this.config.borderColor, radius = this.config.radius) {
     this.ctx.beginPath();
     this.ctx.arc(_x, _y, radius, startAngle, endAngle, anticlockwise);
     this.ctx.strokeStyle = color;
