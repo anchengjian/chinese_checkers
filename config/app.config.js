@@ -3,7 +3,7 @@
 // 区别是不是 Node 环境
 if (typeof window !== 'undefined') {
 
-  exports.serverHost = 'http://localhost:8000';
+  exports.serverHost = ':8000';
 
   // 全局的xhr
   // https://developer.mozilla.org/zh-CN/docs/Web/API/GlobalFetch/fetch
