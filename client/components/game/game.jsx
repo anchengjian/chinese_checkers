@@ -7,6 +7,9 @@ import Checkers from './checkers';
 import { sendMsg, otherPlayerMove } from 'SERVICE/socket.service';
 
 export default class GameComponent extends Component {
+  static contextTypes = {
+    router: React.PropTypes.object.isRequired
+  }
   constructor() {
     super();
   }
@@ -20,6 +23,10 @@ export default class GameComponent extends Component {
   }
 
   componentDidMount() {
+
+    // 根据传参信息进行初始化
+    console.log(this.props.location.query);
+
     let game = this.props.game;
     // 初始化 dom 后开始游戏
     this.checkerGame = new Checkers(this.refs.gameCanvas);

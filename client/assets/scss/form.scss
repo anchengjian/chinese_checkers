@@ -1,26 +1,32 @@
 // form 表单
-form, .form {
+form,
+.form {
   display: block;
-  .form-group {
-    display: block;
-    margin: 20px 0;
+}
+
+.form-group {
+  display: block;
+  margin: 20px 0;
+}
+
+.form-control {
+  display: inline-block;
+  padding: 8px;
+  line-height: 1.43;
+  outline: none;
+  border: 1px solid $gray-light;
+  transition: border-color .3s ease-in-out;
+  &:hover,
+  &:focus {
+    border-color: $primary;
   }
-  .form-control {
-    display: inline-block;
-    padding: 8px;
-    line-height: 1.43;
-    outline: none;
-    border: 1px solid $gray-light;
-    transition: border-color .3s ease-in-out;
-    &:hover, &:focus {
-      border-color: $primary;
-    }
-    &[readonly] {
-      border-color: $gray-light;
-    }
+  &[readonly] {
+    border-color: $gray-light;
   }
 }
 
-label, input[type="checkbox"], input[type="radio"] {
+label,
+input[type="checkbox"],
+input[type="radio"] {
   cursor: pointer;
 }

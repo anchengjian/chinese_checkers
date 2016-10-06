@@ -1,11 +1,12 @@
-import { Game } from 'COMPONENT';
+import { Start } from 'COMPONENT';
 import createContainer from 'UTIL/create_container';
-import * as gameAction from 'ACTION/game.action';
+// import * as gameAction from 'ACTION/game.action';
+import * as userAction from 'ACTION/user.action';
 
 import layout from 'VIEW/layout';
 
 export default {
-  path: '/game/',
+  path: '/',
 
   // 全局布局基页
   component: layout,
@@ -14,12 +15,11 @@ export default {
     getComponent(nextState, cb) {
 
       // 组件连接 state, 注入 props
-      const gameContainer = createContainer(
+      const StartContainer = createContainer(
         ({ game, user }) => ({ game, user }), // mapStateToProps
-        gameAction // mapActionCreators
-      )(Game);
-
-      cb(null, gameContainer);
+        userAction // mapActionCreators
+      )(Start);
+      cb(null, StartContainer);
     }
   }
 };

@@ -12,3 +12,6 @@ export { Redirect };
 
 import Game from './game/game';
 export { Game };
+
+import Start from './start/start';
+export { Start };

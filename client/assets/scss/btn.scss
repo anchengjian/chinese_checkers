@@ -15,6 +15,12 @@
   &:hover {
     background-color: $gray-lighter;
   }
+  &[disabled] {
+    background-color: #ddd;
+    &:hover {
+      background-color: #ccc;
+    }
+  }
 }
 
 .btn-link {
@@ -29,13 +35,10 @@
 .btn-default {}
 
 $btnColorClass: (primary $primary $primary-deep), (success $success $success-deep), (info $info $info-deep), (warning $warning $warning-deep), (danger $danger $danger-deep) !default;
-
 @each $colorClass in $btnColorClass {
-
   $class: nth($colorClass, 1);
   $bgColor: nth($colorClass, 2);
   $hoverBgColor: nth($colorClass, 3);
-
   .btn-#{$class} {
     background-color: #{$bgColor};
     color: $gray-lighter;
@@ -44,5 +47,4 @@ $btnColorClass: (primary $primary $primary-deep), (success $success $success-dee
       color: $white;
     }
   }
-
 }
