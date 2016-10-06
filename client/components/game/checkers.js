@@ -24,7 +24,56 @@ export default class Checkers {
       // 默认的填充颜色
       backgroundColor: '#fff',
       // 被激活的棋子的边框颜色
-      activeBorderColor: '#000'
+      activeBorderColor: '#000',
+
+      // 初始化的棋盘的6个区域内的坐标限制
+      players: {
+        A: {
+          color: 'rgba(255, 165, 0, 1)',
+          area: { x: [5, 8], y: [1, 4] }
+        },
+        B: {
+          color: 'rgba(0, 255, 0, 0.25)',
+          area: { x: [10, 13], y: [5, 8] }
+        },
+        C: {
+          color: '#f44336',
+          area: { x: [14, 17], y: [10, 13] }
+        },
+        D: {
+          color: '#5badf0',
+          area: { x: [10, 13], y: [14, 17] }
+        },
+        E: {
+          color: '#e91e63',
+          area: { x: [5, 8], y: [10, 13] }
+        },
+        F: {
+          color: '#ff9800',
+          area: { x: [1, 4], y: [5, 8] }
+        }
+      }
+    };
+
+    // 当前的数据存放池
+    this.current = {
+      // 当前被选中激活的棋子
+      piece: null,
+      // 当前的角色
+      palyerId: 'A',
+      // 所有参与的玩家
+      players: {
+        'A': {
+          palyerId: 'A',
+          countSteps: 0,
+          moving: false
+        },
+        'D': {
+          palyerId: 'D',
+          countSteps: 0,
+          moving: false
+        }
+      }
     };
 
     // 棋盘的坐标
@@ -45,42 +94,15 @@ export default class Checkers {
       // }
     };
 
-    // 初始化的棋盘的6个区域内的坐标限制
-    this.players = {
-      A: {
-        color: 'rgba(255, 165, 0, 1)',
-        area: { x: [5, 8], y: [1, 4] }
-      },
-      B: {
-        color: 'rgba(0, 255, 0, 0.25)',
-        area: { x: [10, 13], y: [5, 8] }
-      },
-      C: {
-        color: '#f44336',
-        area: { x: [14, 17], y: [10, 13] }
-      },
-      D: {
-        color: '#5badf0',
-        area: { x: [10, 13], y: [14, 17] }
-      },
-      E: {
-        color: '#e91e63',
-        area: { x: [5, 8], y: [10, 13] }
-      },
-      F: {
-        color: '#ff9800',
-        area: { x: [1, 4], y: [5, 8] }
-      }
-    };
-
     this.init();
   }
 
   init() {
     this.drawBoard();
 
-    this.initPlayer('A');
-    this.initPlayer('D');
+    for (let palyerId in this.current.players) {
+      this.initPlayer(palyerId);
+    }
 
     this.initEvents();
   }
@@ -137,8 +159,8 @@ export default class Checkers {
 
   // 根据角色初始化玩家的棋子
   initPlayer(palyerId) {
-    if (!this.players.hasOwnProperty(palyerId)) return;
-    let palyer = this.players[palyerId];
+    if (!this.config.players.hasOwnProperty(palyerId)) return;
+    let palyer = this.config.players[palyerId];
 
     for (let x = palyer.area.x[0]; x <= palyer.area.x[1]; x++) {
       for (let y = palyer.area.y[0]; y <= palyer.area.y[1]; y++) {
@@ -189,7 +211,7 @@ export default class Checkers {
     if (!piece) return;
 
     // 如果检测到的落子之前已经有一个已经选中的棋子，则进行走棋检测，不然进行激活棋子的检测
-    if (this.activePiece) {
+    if (this.current.piece) {
       if (this.isLegalAction(piece)) {
         this.renderMove(piece);
       } else {
@@ -205,8 +227,7 @@ export default class Checkers {
 
   // 设置激活，黑圈圈的高亮
   setActive(piece) {
-    this.activePiece = piece;
-    console.log(piece);
+    this.current.piece = piece;
     // 绘制表示激活状态的小圆圈
     let nowPos = this.pos[piece.ID];
     this.strokeArc(nowPos._x, nowPos._y, this.config.activeBorderColor);
@@ -214,15 +235,15 @@ export default class Checkers {
 
   // 取消激活，取消黑圈圈的高亮
   clearActive() {
-    if (this.activePiece) {
+    if (this.current.piece) {
       // 先清理
-      let oldPos = this.pos[this.activePiece.ID];
+      let oldPos = this.pos[this.current.piece.ID];
       this.cleanArc(oldPos._x, oldPos._y);
       // 如果之前是被填充的，继续填充一个颜色
       let check = this.isFilled(oldPos);
-      if (check) this.fillArc(oldPos._x, oldPos._y, this.players[check.palyerId].color);
+      if (check) this.fillArc(oldPos._x, oldPos._y, this.config.players[check.palyerId].color);
     }
-    this.activePiece = null;
+    this.current.piece = null;
   }
 
   // 设置填充效果
@@ -233,20 +254,20 @@ export default class Checkers {
       fillData = Object.assign({}, this.filled[oldID], { ID: nowID });
     }
     this.filled[fillData.ID] = fillData;
-    this.fillArc(newPos._x, newPos._y, this.players[fillData.palyerId].color);
+    this.fillArc(newPos._x, newPos._y, this.config.players[fillData.palyerId].color);
   }
 
   // 取消填充效果
   clearFill(piece) {
     let oldPos = this.pos[piece.ID];
-    delete this.filled[this.activePiece.ID];
+    delete this.filled[this.current.piece.ID];
     this.cleanArc(oldPos._x, oldPos._y);
   }
 
   // 描绘棋子移动
   renderMove(piece) {
-    this.setFill(piece, this.activePiece);
-    this.clearFill(this.activePiece);
+    this.setFill(piece, this.current.piece);
+    this.clearFill(this.current.piece);
 
     this.clearActive();
     this.setActive(piece);
@@ -271,7 +292,7 @@ export default class Checkers {
   }
 
   // 检测当前落子是否符合规则
-  isLegalAction(newPos, oldPos = this.activePiece) {
+  isLegalAction(newPos, oldPos = this.current.piece) {
 
     // 判断当前的移动点piece是否是可以移动的
     // 如果目标位置被填充了肯定不能移动
@@ -312,6 +333,8 @@ export default class Checkers {
     function validate(target, step) {
       let isFilled = this.isFilled(target);
       let isStepOne = step === 1;
+
+      target.step = step;
 
       // 第二个填充的棋子
       if (mid && isFilled) end = true;
