@@ -66,6 +66,7 @@ npm run deploy
 ```bash
 npm run server
 ```
+需要注意的是：在开发调试的过程中，默认不用单独启动该服务。在dev模式下已经用子进程启动此服务了。见 `config/app.webpack.config.js` 130行。   
 
 ## <a name="architecture">目录架构 </a>
 ### <a name="tree">目录 </a>

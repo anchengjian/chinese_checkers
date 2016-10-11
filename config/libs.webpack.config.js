@@ -9,9 +9,11 @@ const indexPath = path.resolve(__dirname, '../client/index.html');
 let indexFile = fs.readFileSync(indexPath, 'utf-8').toString().replace(/\<script\ type\=\"text\/javascript\"\ src\=\"\.\/js\/libs\.js.*?\>\<\/script\>/, '');
 fs.writeFile(indexPath, indexFile, 'utf-8');
 
+// const libs = Object.keys(require('../package.json').dependencies);
+
 module.exports = {
   entry: {
-    libs: ['react', 'react-dom', 'react-router', 'redux', 'react-redux']
+    libs: ['react', 'react-dom', 'react-router', 'redux', 'react-redux', 'socket.io-client']
   },
   output: {
     publicPath: './',
@@ -20,11 +22,6 @@ module.exports = {
     library: '[name]'
   },
   plugins: [
-    new webpack.DefinePlugin({
-      // development
-      // production
-      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development')
-    }),
     new webpack.DllPlugin({
       context: __dirname,
       path: './config/manifest.json',

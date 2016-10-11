@@ -1,9 +1,11 @@
 // 为了兼容 Node 所以接下来的模块化方式
 
+let appPort = 8000;
+
 // 区别是不是 Node 环境
 if (typeof window !== 'undefined') {
 
-  exports.serverHost = ':8000';
+  exports.serverHost = `http://localhost:${appPort}`;
 
   // 全局的xhr
   // https://developer.mozilla.org/zh-CN/docs/Web/API/GlobalFetch/fetch
@@ -20,7 +22,7 @@ if (typeof window !== 'undefined') {
 } else {
   exports.serverConfig = {
     httpServer: {
-      port: 8000,
+      port: appPort,
       pulicPath: './dist'
     }
   };

@@ -6,8 +6,8 @@
   "scripts": {
     "dev": "webpack-dev-server --hot --devtool --config ./config/app.webpack.config.js --content-base ./dist --host 0.0.0.0 --inline",
     "deploy": "webpack -p --config ./config/app.webpack.config.js",
-    "libs": "webpack --config ./config/libs.webpack.config.js",
-    "server": "node server",
+    "libs": "webpack --config ./config/libs.webpack.config.js -p --define process.env.NODE_ENV='production'",
+    "server": "supervisor -w server,config server",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -43,6 +43,7 @@
     "react-transform-hmr": "^1.0.4",
     "sass-loader": "^3.2.3",
     "style-loader": "^0.13.1",
+    "supervisor": "^0.11.0",
     "url-loader": "^0.5.7",
     "webpack": "^1.13.0",
     "webpack-dev-server": "^1.14.1"

@@ -4,6 +4,8 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const manifest = require('./manifest.json');
 
+const exec = require('child_process').exec;
+
 const ip = getIP()[1];
 const serverPath = `http://${ip}:8080/`;
 const isDev = process.argv[2] === '--hot';
@@ -42,11 +44,7 @@ let config = {
   },
   module: {
     noParse: [],
-    preLoaders: [{
-      test: /\.(js|jsx)$/,
-      exclude: /node_modules/,
-      loader: 'eslint'
-    }],
+    preLoaders: [],
     loaders: [{
       test: /\.(js|jsx)$/,
       exclude: /node_modules/,
@@ -70,13 +68,6 @@ let config = {
       test: /\.(svg|ttf|eot|woff|woff2)/,
       loader: 'file?name=fonts/[name].[ext]'
     }]
-  },
-  eslint: {
-    emitError: true,
-    emitWarning: true,
-    failOnWarning: true,
-    failOnError: true,
-    configFile: '.eslintrc'
   },
   plugins: [
     new webpack.DefinePlugin({
@@ -109,14 +100,43 @@ let htmlOptions = Object.assign({}, appInfo, {
 });
 config.plugins.push(new HtmlWebpackPlugin(htmlOptions));
 
-// UglifyJsPlugin
+// 非开发调试模式
 if (!isDev) {
+  // eslint
+  config.module.preLoaders.push({
+    test: /\.(js|jsx)$/,
+    exclude: /node_modules/,
+    loader: 'eslint'
+  });
+  config.eslint = {
+    emitError: true,
+    emitWarning: true,
+    failOnWarning: true,
+    failOnError: true,
+    configFile: '.eslintrc'
+  };
+
+  // uglify
   let uglify = new webpack.optimize.UglifyJsPlugin({
     compress: {
       warnings: false
     }
   });
   config.plugins.push(uglify);
+}
+
+// 开发模式
+if (isDev) {
+  let server = exec('npm run server', function(err, stdout, stderr) {
+    if (err) console.error(stderr);
+    console.log(stdout);
+  });
+  server.stdout.on('data', function(data) {
+    console.log(data);
+  });
+  process.on('exit', function() {　
+    server.kill();
+  });
 }
 
 // getIP
