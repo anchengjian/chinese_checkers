@@ -1,21 +1,27 @@
 import { ADD_INFO, UPDATE_INFO } from 'ACTION/user.action';
+import { getUserName } from 'SERVICE/user.service';
+import storage from 'UTIL/storage';
 
-const userInfo = {
-  name: '233333'
-};
+let userInfo = storage.get('userInfo') || { name: '' };
+
+if (!userInfo.name && userInfo.name !== 0) {
+  getUserName().then((data) => {
+    userInfo.name = data.data;
+  });
+}
 
 export default function(state = userInfo, action) {
   let oldState = Object.assign({}, state);
 
   switch (action.type) {
     case ADD_INFO:
-      return Object.assign(oldState, action.payload);
-
+      oldState = Object.assign(oldState, action.payload);
+      break;
     case UPDATE_INFO:
       oldState[action.key] = action.val;
-      return oldState;
-
+      break;
     default:
-      return oldState;
   }
+  storage.set('userInfo', oldState);
+  return oldState;
 }

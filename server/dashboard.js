@@ -6,10 +6,10 @@ const log = require('./log.js');
 // mock的后台 api router
 module.exports = function(app) {
   // 以下为mockserver配置页面逻辑
-  app.post('/api/1.0/login/', function(req, res) {
+  app.get('/api/1.0/username/', function(req, res) {
     let index = ~~(Math.random() * userNames.length);
-    let name = userNames[index];
-    res.send({ name, index });
+    let data = userNames[index];
+    res.send({ data });
 
     log('/login 来了一个请求');
   });

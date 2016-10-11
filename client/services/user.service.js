@@ -1,9 +1,9 @@
 import xhr from 'SERVICE/xhr';
 
-export function userLogin(formBody) {
-  let path = '/api/1.0/login/';
+export function getUserName(formBody) {
+  let path = '/api/1.0/username/';
   let config = {
-    method: 'POST',
+    method: 'GET',
     body: formBody
   };
 

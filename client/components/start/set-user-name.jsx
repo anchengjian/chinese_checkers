@@ -17,6 +17,10 @@ export default class SetNumOfPlayersComponent extends Component {
     };
   }
 
+  // componentWillMount() {
+  //   console.log(this.props.user);
+  // }
+
   render() {
     return (
       <section className={this.props.className}>
