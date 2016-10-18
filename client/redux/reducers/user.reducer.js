@@ -1,14 +1,7 @@
 import { ADD_INFO, UPDATE_INFO } from 'ACTION/user.action';
-import { getUserName } from 'SERVICE/user.service';
 import storage from 'UTIL/storage';
 
 let userInfo = storage.get('userInfo') || { name: '' };
-
-if (!userInfo.name && userInfo.name !== 0) {
-  getUserName().then((data) => {
-    userInfo.name = data.data;
-  });
-}
 
 export default function(state = userInfo, action) {
   let oldState = Object.assign({}, state);
