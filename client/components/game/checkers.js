@@ -4,8 +4,9 @@ let endAngle = 2 * Math.PI;
 let anticlockwise = true;
 
 export default class Checkers {
-  constructor(canvas) {
-    if (!canvas) return;
+  constructor(canvas, playersLen) {
+    playersLen = ~~playersLen;
+    if (!canvas || !playersLen) return;
 
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
@@ -63,18 +64,20 @@ export default class Checkers {
       palyerId: 'A',
       // 所有参与的玩家
       players: {
-        'A': {
-          palyerId: 'A',
-          countSteps: 0,
-          moving: false
-        },
-        'D': {
-          palyerId: 'D',
-          countSteps: 0,
-          moving: false
-        }
+        // 'A': {
+        //   palyerId: 'A',
+        //   countSteps: 0,
+        //   moving: false
+        // }
       }
     };
+    'ADBECF'.substr(0, playersLen).split('').forEach((palyerId) => {
+      this.current.players[palyerId] = {
+        palyerId: palyerId,
+        countSteps: 0,
+        moving: false
+      };
+    });
 
     // 棋盘的坐标
     this.pos = {

@@ -77,10 +77,13 @@ class Socket {
     if (!this.roomInfo.hasOwnProperty(roomID)) return;
     this.cleanRoom();
     socket.leave(roomID); // 退出房间
+    let index = this.roomInfo[roomID].players.indexOf(user);
+    this.roomInfo[roomID].players.splice(index, 1);
     this.sendSysMsg(roomID, { user, msg: '退出了房间', roomID });
   }
 
   sendSysMsg(roomID, msg) {
+    Object.assign(msg, { type: 'sysMsg' });
     this.io.to(roomID).emit('sysMsg', msg);
   }
 

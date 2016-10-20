@@ -33,7 +33,7 @@ export default class GameComponent extends Component {
 
     // 开始游戏，互传消息
     let game = this.props.game;
-    this.checkerGame = new Checkers(this.refs.gameCanvas);
+    this.checkerGame = new Checkers(this.refs.gameCanvas, data.players);
     // 自己动了告诉其他人
     this.checkerGame.palyerMove = (ev, piece) => {
       // this.props.updateGame(game.player, [ev, piece]);
