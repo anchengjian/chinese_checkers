@@ -41,9 +41,14 @@ class Socket {
 
       // 离开房间
       socket.on('leaveRoom', () => socket.emit('disconnect'));
-      socket.on('disconnect', () => this.leaveRoom(socket, roomID));
+      socket.on('disconnect', () => this.leaveRoom(socket, user, roomID));
       socket.on('error', () => log('一个错误了', 'socketId=>', socket.id));
 
+      // 游戏移动棋子的状态中转
+      socket.on('selfMove', (data) => {
+        log('收到一个玩家的运动', data);
+        this.io.to(roomID).emit('otherMove', data);
+      });
     });
   }
 
@@ -62,20 +67,20 @@ class Socket {
     this.roomInfo[roomID].players.push(user); // 将用户昵称加入房间名单中
     socket.join(roomID); // 加入房间
     // 通知房间内人员
-    this.sendSysMsg({ user, msg: '加入了房间', room: this.roomInfo[roomID] });
+    this.sendSysMsg(roomID, { user, msg: '加入了房间', room: this.roomInfo[roomID] });
     return { error: false, msg: '加入房间：成功' };
   }
 
-  leaveRoom(socket, roomID) {
+  leaveRoom(socket, user, roomID) {
     log('断开了一个连接', 'socketId=>', socket.id);
     // 从房间名单中移除
     if (!this.roomInfo.hasOwnProperty(roomID)) return;
     this.cleanRoom();
     socket.leave(roomID); // 退出房间
-    this.sendSysMsg({ user, msg: '退出了房间', roomID });
+    this.sendSysMsg(roomID, { user, msg: '退出了房间', roomID });
   }
 
-  sendSysMsg(msg) {
+  sendSysMsg(roomID, msg) {
     this.io.to(roomID).emit('sysMsg', msg);
   }
 
