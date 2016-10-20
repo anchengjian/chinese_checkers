@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { getUserName } from 'SERVICE/user.service';
+import { getRoom } from 'SERVICE/socket.service';
 
 export default class StartComponent extends Component {
   constructor() {
@@ -14,18 +15,25 @@ export default class StartComponent extends Component {
     };
 
     this.parameToGame = {
-      roomID: '123456',
-      players: '2',
+      roomID: '',
+      players: '',
       getLink() {
         return `/game/?roomID=${this.roomID}&players=${this.players}`;
       }
     };
 
     this.setNum = (ev) => {
-      let val = ev.target.value;
+      let val = typeof ev === 'number' ? ev : ~~ev.target.value;
       this.parameToGame.players = val;
       // change roomID
+      getRoom(val, (room) => {
+        this.parameToGame.roomID = room.id;
+        this.setState(this.parameToGame);
+      });
     };
+
+    // init defatlu 2
+    this.setNum(2);
 
     this.goToGame = () => {
       this.props.history.pushState(null, this.parameToGame.getLink());
@@ -62,7 +70,7 @@ export default class StartComponent extends Component {
             <span>六个玩家</span>
           </label>
         </div>
-        <button className="btn btn-primary" onClick={this.goToGame} disabled={this.nextBtnDisabled}>开始</button>
+        <button className="btn btn-primary" onClick={this.goToGame} disabled={this.nextBtnDisabled || !this.parameToGame.roomID.length}>开始</button>
       </section>
     );
   }

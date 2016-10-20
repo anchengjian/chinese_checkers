@@ -4,12 +4,13 @@ import React, { Component } from 'react';
 import notify from 'UTIL/notify';
 
 import Checkers from './checkers';
-import { sendMsg, otherPlayerMove } from 'SERVICE/socket.service';
+import { joinRoom, leaveRoom, sendMsg, otherPlayerMove } from 'SERVICE/socket.service';
 
 export default class GameComponent extends Component {
   static contextTypes = {
     router: React.PropTypes.object.isRequired
   }
+
   constructor() {
     super();
   }
@@ -23,32 +24,32 @@ export default class GameComponent extends Component {
   }
 
   componentDidMount() {
+    // 加入游戏房间，失败到首页
+    let data = this.props.location.query;
+    data.userName = this.props.user.name;
+    joinRoom(data, (msg) => {
+      if (msg.error) this.props.history.pushState(null, '/');
+    });
 
-    // 根据传参信息进行初始化
-    console.log(this.props.location.query);
-
+    // 开始游戏，互传消息
     let game = this.props.game;
-    // 初始化 dom 后开始游戏
     this.checkerGame = new Checkers(this.refs.gameCanvas);
-
     // 自己动了告诉其他人
     this.checkerGame.palyerMove = (ev, piece) => {
       // this.props.updateGame(game.player, [ev, piece]);
       sendMsg(game.player, [ev, piece]);
     };
-
     otherPlayerMove((player, move) => {
       this.checkerGame.clickHandle(...move);
     });
   }
 
-  componentWillReceiveProps(nextProps) {
-    // console.log(nextProps);
-    // TODO： 接收其他人的消息
-
-  }
+  // componentWillReceiveProps(nextProps) {
+  //   console.log(nextProps);
+  // }
 
   componentWillUnmount() {
+    leaveRoom();
     this.checkerGame.destory();
   }
 

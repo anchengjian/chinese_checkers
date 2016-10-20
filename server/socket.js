@@ -9,65 +9,99 @@ class Socket {
     this.io = require('socket.io')(app.httpServer);
 
     // 房间信息
-    this.roomInfo = {};
+    this.roomInfo = {
+      // roomID: {
+      //   id: roomID,
+      //   length: 2,
+      //   players: ['tom', 'jeery']
+      // }
+    };
 
     this.socketRunWithEvents();
   }
+
   socketRunWithEvents() {
     // 建立长连接后开始执行逻辑
-    this.io.on('connection', function(socket) {
-      let socketId = socket.id;
-      log('建立了一个socket的长连接哦', socketId);
+    this.io.on('connection', (socket) => {
+      log('建立了一个socket的长连接哦', socket.id);
 
-      socket.on('error', () => log('一个错误了', 'socketId=>', socketId));
+      // getRoomIdByLength
+      socket.on('getRoomByLength', (num, callback) => {
+        callback(this.getRoomByLength(num));
+      });
 
-      // 无聊,先握手
-      // socket.on('hello', (msg) => {
-      //   log('一个官方的正式握手');
-      //   socket.emit('word', '666');
-      // });
-
-      // socket.on('SELF_MOVE', (data) => {
-      //   socket.broadcast.emit('OTHER_MOVE', data);
-      // });
-
+      // 加入房间
       let user = '';
       let roomID = '';
-
-      socket.on('join', (data) => {
-        user = data.user;
+      socket.on('joinRoom', (data, callback) => {
+        user = data.userName;
         roomID = data.roomID;
-        if (!user || !roomID) return;
-
-        // 将用户昵称加入房间名单中
-        if (!this.roomInfo[roomID]) this.roomInfo[roomID] = [];
-        this.roomInfo[roomID].push(data);
-
-        socket.join(roomID); // 加入房间
-        // 通知房间内人员
-        socketIO.to(roomID).emit('sys', user + '加入了房间', this.roomInfo[roomID]);
+        callback(this.joinRoom(socket, user, roomID));
       });
 
-      socket.on('leave', () => socket.emit('disconnect'));
-
-      socket.on('disconnect', () => {
-        log('断开了一个连接', 'socketId=>', socketId);
-        // 从房间名单中移除
-        var index = this.roomInfo[roomID].indexOf(user);
-        if (index >= 0) this.roomInfo[roomID].splice(index, 1);
-
-        socket.leave(roomID); // 退出房间
-        socketIO.to(roomID).emit('sys', user + '退出了房间', this.roomInfo[roomID]);
-      });
-
-      // 接收用户消息,发送相应的房间
-      socket.on('message', (msg) => {
-        // 验证如果用户不在房间内则不给发送
-        if (this.roomInfo[roomID].indexOf(user) === -1) return;
-        socketIO.to(roomID).emit('msg', user, msg);
-      });
+      // 离开房间
+      socket.on('leaveRoom', () => socket.emit('disconnect'));
+      socket.on('disconnect', () => this.leaveRoom(socket, roomID));
+      socket.on('error', () => log('一个错误了', 'socketId=>', socket.id));
 
     });
+  }
+
+  getRoomByLength(data) {
+    for (let i in this.roomInfo) {
+      if (!this.roomInfo.hasOwnProperty(i)) continue;
+      let room = this.roomInfo[i];
+      if (room.length === data && data > room.players.length) return room;
+    }
+    let newRoom = this.createRoom(data);
+    return newRoom;
+  }
+
+  joinRoom(socket, user, roomID) {
+    if (!user || !roomID || !this.roomInfo.hasOwnProperty(roomID)) return { error: true, msg: '加入房间：失败' };
+    this.roomInfo[roomID].players.push(user); // 将用户昵称加入房间名单中
+    socket.join(roomID); // 加入房间
+    // 通知房间内人员
+    this.sendSysMsg({ user, msg: '加入了房间', room: this.roomInfo[roomID] });
+    return { error: false, msg: '加入房间：成功' };
+  }
+
+  leaveRoom(socket, roomID) {
+    log('断开了一个连接', 'socketId=>', socket.id);
+    // 从房间名单中移除
+    if (!this.roomInfo.hasOwnProperty(roomID)) return;
+    this.cleanRoom();
+    socket.leave(roomID); // 退出房间
+    this.sendSysMsg({ user, msg: '退出了房间', roomID });
+  }
+
+  sendSysMsg(msg) {
+    this.io.to(roomID).emit('sysMsg', msg);
+  }
+
+  createRoom(length, players = []) {
+    if (length > 6 || length < 2) return;
+    let id = this.getRoomID();
+    let creatAt = new Date().getTime();
+    let used = false;
+    return this.roomInfo[id] = { id, length, players, creatAt, used };
+  }
+
+  getRoomID() {
+    return 'xxxx-xxxx-xxxx-xxxx-xxxx'.replace(/[xy]/g, function(c) {
+      let r = Math.random() * 16 | 0;
+      let v = c == 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  }
+
+  cleanRoom() {
+    // 超过一天要被清理 86400000 = 24 * 60 * 60 *1000
+    let currentTime = new Date().getTime() - 86400000;
+    for (let i in this.roomInfo) {
+      let room = this.roomInfo[i];
+      if (room.players.length < 1 && (room.used || room.creatAt < currentTime)) delete this.roomInfo[i];
+    }
   }
 }
 
