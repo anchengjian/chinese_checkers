@@ -31,27 +31,27 @@ export default class Checkers {
       players: {
         A: {
           color: 'rgba(255, 165, 0, 1)',
-          area: { x: [5, 8], y: [1, 4] }
+          area: { x: 5, y: 1 }
         },
         B: {
           color: 'rgba(0, 255, 0, 0.25)',
-          area: { x: [10, 13], y: [5, 8] }
+          area: { x: 10, y: 5, special: 1 }
         },
         C: {
           color: '#f44336',
-          area: { x: [14, 17], y: [10, 13] }
+          area: { x: 14, y: 10 }
         },
         D: {
           color: '#5badf0',
-          area: { x: [10, 13], y: [14, 17] }
+          area: { x: 10, y: 14, special: 1 }
         },
         E: {
           color: '#e91e63',
-          area: { x: [5, 8], y: [10, 13] }
+          area: { x: 5, y: 10 }
         },
         F: {
           color: '#ff9800',
-          area: { x: [1, 4], y: [5, 8] }
+          area: { x: 1, y: 5, special: 1 }
         }
       }
     };
@@ -102,11 +102,9 @@ export default class Checkers {
 
   init() {
     this.drawBoard();
-
     for (let palyerId in this.current.players) {
       this.initPlayer(palyerId);
     }
-
     this.initEvents();
   }
 
@@ -165,9 +163,12 @@ export default class Checkers {
     if (!this.config.players.hasOwnProperty(palyerId)) return;
     let palyer = this.config.players[palyerId];
 
-    for (let x = palyer.area.x[0]; x <= palyer.area.x[1]; x++) {
-      for (let y = palyer.area.y[0]; y <= palyer.area.y[1]; y++) {
-
+    for (let i = 0; i < 4; i++) {
+      let j = palyer.area.special ? 0 : i;
+      let maxY = palyer.area.special ? i + 1 : 4;
+      for (; j < maxY; j++) {
+        let x = palyer.area.x + i;
+        let y = palyer.area.y + j;
         let ID = this.getID(x, y);
         let newPos = this.pos[ID];
         if (!newPos) continue;
