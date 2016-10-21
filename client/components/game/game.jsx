@@ -28,20 +28,22 @@ export default class GameComponent extends Component {
     let data = this.props.location.query;
     data.userName = this.props.user.name;
     joinRoom(data, (msg) => {
-      if (msg.error) this.props.history.pushState(null, '/');
+      if (!msg || msg.error || !msg.room) return this.props.history.pushState(null, '/');
+      let index = msg.room.players.indexOf(this.props.user.name);
+      // 开始游戏，互传消息
+      this.checkerGame = new Checkers(this.refs.gameCanvas, index, data.players);
+
+      this.checkerGame.palyerMove = (ev, piece) => {
+        sendMsg(this.checkerGame.current.playerID, [ev, piece]);
+      };
+
+      otherPlayerMove((player, move) => {
+        console.log(player, this.checkerGame.current.playerID);
+        if (player === this.checkerGame.current.playerID) return;
+        this.checkerGame.clickHandle(...move);
+      });
     });
 
-    // 开始游戏，互传消息
-    let game = this.props.game;
-    this.checkerGame = new Checkers(this.refs.gameCanvas, data.players);
-    // 自己动了告诉其他人
-    this.checkerGame.palyerMove = (ev, piece) => {
-      // this.props.updateGame(game.player, [ev, piece]);
-      sendMsg(game.player, [ev, piece]);
-    };
-    otherPlayerMove((player, move) => {
-      this.checkerGame.clickHandle(...move);
-    });
   }
 
   // componentWillReceiveProps(nextProps) {
@@ -50,7 +52,7 @@ export default class GameComponent extends Component {
 
   componentWillUnmount() {
     leaveRoom();
-    this.checkerGame.destory();
+    this.checkerGame && this.checkerGame.destory();
   }
 
   render() {

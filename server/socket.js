@@ -36,7 +36,7 @@ class Socket {
       socket.on('joinRoom', (data, callback) => {
         user = data.userName;
         roomID = data.roomID;
-        callback(this.joinRoom(socket, user, roomID));
+        callback(this.joinRoom(socket, user, roomID, ~~data.players));
       });
 
       // 离开房间
@@ -62,13 +62,13 @@ class Socket {
     return newRoom;
   }
 
-  joinRoom(socket, user, roomID) {
-    if (!user || !roomID || !this.roomInfo.hasOwnProperty(roomID)) return { error: true, msg: '加入房间：失败' };
+  joinRoom(socket, user, roomID, len) {
+    if (!user || !roomID || !this.roomInfo.hasOwnProperty(roomID) || this.roomInfo[roomID].length !== len) return { error: true, msg: '加入房间：失败' };
     this.roomInfo[roomID].players.push(user); // 将用户昵称加入房间名单中
     socket.join(roomID); // 加入房间
     // 通知房间内人员
-    this.sendSysMsg(roomID, { user, msg: '加入了房间', room: this.roomInfo[roomID] });
-    return { error: false, msg: '加入房间：成功' };
+    this.sendSysMsg(roomID, { user, msg: '加入了房间' });
+    return { error: false, msg: '加入房间：成功', room: this.roomInfo[roomID] };
   }
 
   leaveRoom(socket, user, roomID) {

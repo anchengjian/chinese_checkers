@@ -4,7 +4,7 @@ let endAngle = 2 * Math.PI;
 let anticlockwise = true;
 
 export default class Checkers {
-  constructor(canvas, playersLen) {
+  constructor(canvas, index, playersLen) {
     playersLen = ~~playersLen;
     if (!canvas || !playersLen) return;
 
@@ -61,23 +61,25 @@ export default class Checkers {
       // 当前被选中激活的棋子
       piece: null,
       // 当前的角色
-      palyerId: 'A',
+      playerID: '',
       // 所有参与的玩家
       players: {
         // 'A': {
-        //   palyerId: 'A',
+        //   playerID: 'A',
         //   countSteps: 0,
         //   moving: false
         // }
       }
     };
-    'ADBECF'.substr(0, playersLen).split('').forEach((palyerId) => {
-      this.current.players[palyerId] = {
-        palyerId: palyerId,
+    let order = 'ADBECF';
+    order.substr(0, playersLen).split('').forEach((playerID) => {
+      this.current.players[playerID] = {
+        playerID: playerID,
         countSteps: 0,
         moving: false
       };
     });
+    this.current.playerID = order.substr(index, 1);
 
     // 棋盘的坐标
     this.pos = {
@@ -90,20 +92,20 @@ export default class Checkers {
     };
 
     // 数据结构，棋盘中被填棋子的坐标集合
-    this.filled = {
-      // '1-5': {
-      //   ID: '1-5',
-      //   palyerId: 'A'
-      // }
-    };
+    // this.filled = {
+    //   // '1-5': {
+    //   //   ID: '1-5',
+    //   //   playerID: 'A'
+    //   // }
+    // };
 
     this.init();
   }
 
   init() {
     this.drawBoard();
-    for (let palyerId in this.current.players) {
-      this.initPlayer(palyerId);
+    for (let playerID in this.current.players) {
+      this.initPlayer(playerID);
     }
     this.initEvents();
   }
@@ -159,9 +161,9 @@ export default class Checkers {
   }
 
   // 根据角色初始化玩家的棋子
-  initPlayer(palyerId) {
-    if (!this.config.players.hasOwnProperty(palyerId)) return;
-    let palyer = this.config.players[palyerId];
+  initPlayer(playerID) {
+    if (!this.config.players.hasOwnProperty(playerID)) return;
+    let palyer = this.config.players[playerID];
 
     for (let i = 0; i < 4; i++) {
       let j = palyer.area.special ? 0 : i;
@@ -173,10 +175,12 @@ export default class Checkers {
         let newPos = this.pos[ID];
         if (!newPos) continue;
 
-        let oldPos = null;
-        let fillData = { ID, palyerId };
+        this.pos[ID].playerID = playerID;
+        this.fillArc(newPos._x, newPos._y, this.config.players[playerID].color);
+        // let oldPos = null;
+        // let fillData = { ID, playerID };
         // 记录
-        this.setFill(newPos, oldPos, fillData);
+        // this.setFill(newPos, oldPos, fillData);
       }
     }
   }
@@ -209,6 +213,9 @@ export default class Checkers {
     } else {
       let point = this.getPointByEvent(ev);
       piece = this.getPieceByPoint(point);
+      // 自己的点击操作，禁止动别人的棋子
+      let isFill = this.isFilled(piece);
+      if (isFill && isFill.playerID !== this.current.playerID) return;
     }
 
     // 如果没有获得真实可用的棋子则退出
@@ -245,36 +252,40 @@ export default class Checkers {
       this.cleanArc(oldPos._x, oldPos._y);
       // 如果之前是被填充的，继续填充一个颜色
       let check = this.isFilled(oldPos);
-      if (check) this.fillArc(oldPos._x, oldPos._y, this.config.players[check.palyerId].color);
+      if (check) this.fillArc(oldPos._x, oldPos._y, this.config.players[check.playerID].color);
     }
     this.current.piece = null;
   }
 
   // 设置填充效果
-  setFill(newPos, oldPos, fillData) {
-    if (!fillData) {
-      let oldID = this.getID(oldPos);
-      let nowID = this.getID(newPos);
-      fillData = Object.assign({}, this.filled[oldID], { ID: nowID });
-    }
-    this.filled[fillData.ID] = fillData;
-    this.fillArc(newPos._x, newPos._y, this.config.players[fillData.palyerId].color);
-  }
+  // setFill(newPos, oldPos, fillData) {
+  //   if (!fillData) {
+  //     let oldID = this.getID(oldPos);
+  //     let nowID = this.getID(newPos);
+  //     fillData = Object.assign({}, this.filled[oldID], { ID: nowID });
+  //   }
+  //   this.filled[fillData.ID] = fillData;
+  //   this.fillArc(newPos._x, newPos._y, this.config.players[fillData.playerID].color);
+  // }
 
   // 取消填充效果
-  clearFill(piece) {
-    let oldPos = this.pos[piece.ID];
-    delete this.filled[this.current.piece.ID];
-    this.cleanArc(oldPos._x, oldPos._y);
-  }
+  // clearFill(piece) {
+  //   let oldPos = this.pos[piece.ID];
+  //   delete this.filled[this.current.piece.ID];
+  //   this.cleanArc(oldPos._x, oldPos._y);
+  // }
 
   // 描绘棋子移动
-  renderMove(piece) {
-    this.setFill(piece, this.current.piece);
-    this.clearFill(this.current.piece);
+  renderMove(targetPiece) {
+    // this.setFill(targetPiece, this.current.piece);
+    // this.clearFill(this.current.piece);
+    let oldPos = this.current.piece;
+    this.fillArc(targetPiece._x, targetPiece._y, this.config.players[oldPos.playerID].color);
+    this.cleanArc(this.current.piece._x, oldPos._y);
+    delete this.pos[oldPos.ID].playerID;
 
     this.clearActive();
-    this.setActive(piece);
+    this.setActive(targetPiece);
   }
 
   // 通过event事件获得点击的坐标
@@ -355,7 +366,9 @@ export default class Checkers {
 
   // 检查当前坐标是否落子了
   isFilled(piece) {
-    return this.filled[this.getID(piece)];
+    let pos = this.pos[this.getID(piece)];
+    if (pos && pos.playerID) return pos;
+    // return this.filled[this.getID(piece)];
   }
 
   // 全局统一的ID样式
