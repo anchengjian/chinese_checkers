@@ -4,7 +4,7 @@ let endAngle = 2 * Math.PI;
 let anticlockwise = true;
 
 export default class Checkers {
-  constructor(canvas, index, numOfPlayers) {
+  constructor(canvas, ownerIndex, numOfPlayers) {
     numOfPlayers = ~~numOfPlayers;
     if (!canvas || !numOfPlayers) return;
 
@@ -13,6 +13,9 @@ export default class Checkers {
 
     // 销毁周期队列
     this._destoryQueue = [];
+
+    // 所有玩家的走位历史记录，方便悔棋i、重来
+    this.history = [];
 
     // style and config
     this.config = {
@@ -60,26 +63,30 @@ export default class Checkers {
     this.current = {
       // 当前被选中激活的棋子
       piece: null,
-      // 当前的角色
+      // 当前有权限走棋的玩家
       playerID: '',
+      ownerID: '',
       // 所有参与的玩家
       players: {
         // 'A': {
         //   playerID: 'A',
-        //   countSteps: 0,
-        //   moving: false
+        //   countSteps: 0
         // }
-      }
+      },
+      order: [],
+      cango: []
     };
-    let order = 'ADBECF';
-    order.substr(0, numOfPlayers).split('').forEach((playerID) => {
+    let defOrder = 'ADBECF';
+    this.current.order = defOrder.substr(0, numOfPlayers).split('').sort();
+    this.current.order.forEach((playerID) => {
       this.current.players[playerID] = {
         playerID: playerID,
-        countSteps: 0,
-        moving: false
+        countSteps: 0
       };
     });
-    this.current.playerID = order.substr(index, 1);
+    // 默认A玩家，即先进入游戏的玩家先走
+    this.current.playerID = defOrder.substr(0, 1);
+    this.current.ownerID = defOrder.substr(ownerIndex, 1);
 
     // 棋盘的坐标
     this.pos = {
@@ -87,7 +94,8 @@ export default class Checkers {
       //   x: 1,  // 跳棋坐标系x
       //   y: 5,  // 跳棋坐标系y
       //   _x: 0,  // 实际上的垂直坐标系的x
-      //   _y: 60  // 实际上的垂直坐标系的y
+      //   _y: 60,  // 实际上的垂直坐标系的y
+      //   playerID: 'A'  // 可能不存在该属性。若存在则代表当前坐标上有一枚该角色的棋子
       // }
     };
 
@@ -206,18 +214,40 @@ export default class Checkers {
       if (isFill && isFill.playerID !== this.current.playerID) return;
     }
 
-    // 如果没有获得真实可用的棋子则退出
+    // 如果没有获得真实可用的坐标则退出
     if (!piece) return;
 
-    // 如果检测到的落子之前已经有一个已经选中的棋子，则进行走棋检测，不然进行激活棋子的检测
+    // 复杂的逻辑，哈哈，见文档流程图
     if (this.current.piece) {
-      if (this.isLegalAction(piece)) {
+      let isLegalMove = this.current.cango.findIndex(v => v.ID === piece.ID);
+      if (isLegalMove > -1) {
         this.renderMove(piece);
+        if (this.current.cango[isLegalMove].step === 1) {
+          this.nextPlayer();
+        } else {
+          this.current.cango = this.getPosByCanMove(piece, 'outOneStep');
+          if (this.current.cango.length <= 0) {
+            this.nextPlayer();
+          } else {
+            this.setActive(piece);
+          }
+        }
       } else {
-        this.clearActive();
+        let isFill = this.isFilled(piece);
+        if (isFill) {
+          this.setActive(piece);
+          this.current.cango = this.getPosByCanMove(piece);
+        } else {
+          this.clearActive();
+        }
       }
     } else {
-      this.setActive(piece);
+      if (this.current.cango.length <= 0) {
+        this.setActive(piece);
+        this.current.cango = this.getPosByCanMove(piece);
+      } else {
+        this.nextPlayer();
+      }
     }
 
     // callback
@@ -226,6 +256,7 @@ export default class Checkers {
 
   // 设置激活，黑圈圈的高亮
   setActive(piece) {
+    if (this.current.piece) this.clearActive();
     this.current.piece = piece;
     // 绘制表示激活状态的小圆圈
     let nowPos = this.pos[piece.ID];
@@ -246,15 +277,23 @@ export default class Checkers {
   }
 
   // 描绘棋子移动
-  renderMove(targetPiece) {
+  renderMove(newPos, outOneStep) {
     let oldPos = this.current.piece;
-    targetPiece.playerID = oldPos.playerID;
-    this.fillArc(targetPiece._x, targetPiece._y, this.config.players[oldPos.playerID].color);
+    newPos.playerID = oldPos.playerID;
+    this.fillArc(newPos._x, newPos._y, this.config.players[oldPos.playerID].color);
     this.cleanArc(this.current.piece._x, oldPos._y);
-    delete this.pos[oldPos.ID].playerID;
 
+    this.history.push({ playerID: this.current.playerID, oldPos, newPos });
+    delete this.pos[oldPos.ID].playerID;
+  }
+
+  // 当前玩家已经没路可走，下个玩家走
+  nextPlayer() {
+    let i = this.current.order.indexOf(this.current.playerID);
+    if (++i >= this.current.order.length) i = 0;
+    this.current.playerID = this.current.order[i];
     this.clearActive();
-    this.setActive(targetPiece);
+    this.current.cango = [];
   }
 
   // 通过event事件获得点击的坐标
@@ -275,23 +314,7 @@ export default class Checkers {
     }
   }
 
-  // 检测当前落子是否符合规则
-  isLegalAction(newPos, oldPos = this.current.piece) {
-
-    // 判断当前的移动点piece是否是可以移动的
-    // 如果目标位置被填充了肯定不能移动
-    if (!newPos || this.isFilled(newPos)) return;
-
-    let canMove = this.getPosByCanMove(oldPos);
-    let len = canMove.length;
-    console.log(canMove);
-    if (len < 1) return;
-    for (let i = 0; i < len; i++) {
-      if (canMove[i].ID === newPos.ID) return true;
-    }
-  }
-
-  getPosByCanMove(piece) {
+  getPosByCanMove(piece, outOneStep) {
     let res = [];
     if (!this.isFilled(piece)) return res;
     // 常量得出方式见文档
@@ -325,7 +348,7 @@ export default class Checkers {
       if (mid && isFilled) end = true;
 
       // 一步范围并且没填充
-      if (isStepOne && !isFilled) return res.push(target);
+      if (isStepOne && !isFilled && !outOneStep) return res.push(target);
 
       // 第一个填充的棋子做跳板
       if (isFilled && !mid) return (mid = target);
