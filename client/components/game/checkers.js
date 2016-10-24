@@ -91,14 +91,6 @@ export default class Checkers {
       // }
     };
 
-    // 数据结构，棋盘中被填棋子的坐标集合
-    // this.filled = {
-    //   // '1-5': {
-    //   //   ID: '1-5',
-    //   //   playerID: 'A'
-    //   // }
-    // };
-
     this.init();
   }
 
@@ -177,10 +169,6 @@ export default class Checkers {
 
         this.pos[ID].playerID = playerID;
         this.fillArc(newPos._x, newPos._y, this.config.players[playerID].color);
-        // let oldPos = null;
-        // let fillData = { ID, playerID };
-        // 记录
-        // this.setFill(newPos, oldPos, fillData);
       }
     }
   }
@@ -257,28 +245,8 @@ export default class Checkers {
     this.current.piece = null;
   }
 
-  // 设置填充效果
-  // setFill(newPos, oldPos, fillData) {
-  //   if (!fillData) {
-  //     let oldID = this.getID(oldPos);
-  //     let nowID = this.getID(newPos);
-  //     fillData = Object.assign({}, this.filled[oldID], { ID: nowID });
-  //   }
-  //   this.filled[fillData.ID] = fillData;
-  //   this.fillArc(newPos._x, newPos._y, this.config.players[fillData.playerID].color);
-  // }
-
-  // 取消填充效果
-  // clearFill(piece) {
-  //   let oldPos = this.pos[piece.ID];
-  //   delete this.filled[this.current.piece.ID];
-  //   this.cleanArc(oldPos._x, oldPos._y);
-  // }
-
   // 描绘棋子移动
   renderMove(targetPiece) {
-    // this.setFill(targetPiece, this.current.piece);
-    // this.clearFill(this.current.piece);
     let oldPos = this.current.piece;
     targetPiece.playerID = oldPos.playerID;
     this.fillArc(targetPiece._x, targetPiece._y, this.config.players[oldPos.playerID].color);
@@ -370,7 +338,6 @@ export default class Checkers {
   isFilled(piece) {
     let pos = this.pos[this.getID(piece)];
     if (pos && pos.playerID) return pos;
-    // return this.filled[this.getID(piece)];
   }
 
   // 全局统一的ID样式
