@@ -28,10 +28,10 @@ export default class GameComponent extends Component {
     let data = this.props.location.query;
     data.userName = this.props.user.name;
     joinRoom(data, (msg) => {
-      if (!msg || msg.error || !msg.room) return this.props.history.pushState(null, '/');
-      let index = msg.room.players.indexOf(this.props.user.name);
+      console.log(msg);
+      if (!msg || msg.error || !msg.room || msg.index < 0) return this.props.history.pushState(null, '/');
       // 开始游戏，互传消息
-      this.checkerGame = new Checkers(this.refs.gameCanvas, index, data.numofplayers);
+      this.checkerGame = new Checkers(this.refs.gameCanvas, msg.index, data.numofplayers);
 
       this.checkerGame.palyerMove = (ev, piece) => {
         sendMsg(this.checkerGame.current.playerID, [ev, piece]);
@@ -45,13 +45,11 @@ export default class GameComponent extends Component {
 
   }
 
-  // componentWillReceiveProps(nextProps) {
-  //   console.log(nextProps);
-  // }
-
   componentWillUnmount() {
-    leaveRoom();
-    this.checkerGame && this.checkerGame.destory();
+    if (this.checkerGame) {
+      leaveRoom();
+      this.checkerGame.destory();
+    }
   }
 
   render() {

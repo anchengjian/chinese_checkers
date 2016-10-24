@@ -14,7 +14,7 @@ class Socket {
       //   id: roomID,
       //   numOfPlayers: 2,
       //   players: [
-      //     { name: 'tom', playerID: 'A', active: true },
+      //     { name: 'tom', playerID: 'A'},
       //   ]
       // }
     };
@@ -65,23 +65,47 @@ class Socket {
   }
 
   joinRoom(socket, user, roomID, len) {
-    if (!user || !roomID || !this.roomInfo.hasOwnProperty(roomID) || this.roomInfo[roomID].numOfPlayers !== len) return { error: true, msg: '加入房间：失败' };
-    this.roomInfo[roomID].players.push(user); // 将用户昵称加入房间名单中
+    if (!user || !roomID || !this.roomInfo.hasOwnProperty(roomID) || this.roomInfo[roomID].numOfPlayers !== len) return { error: true, msg: '加入房间：参数错误' };
+    // 做断网刷新等容错处理
+    let room = this.roomInfo[roomID];
+    let index = -1;
+    let player = room.players.filter((v, i) => {
+      if (v.name === user) {
+        index = i;
+        return true;
+      }
+    })[0];
+    if (player) {
+      if (player.active) return { error: true, msg: '加入房间：已有同名活跃玩家' };
+      room.players[index].active = true;
+    } else {
+      // 将新用户昵称加入房间名单中
+      index = room.players.length;
+      room.players.push({ name: user, active: true });
+    }
     socket.join(roomID); // 加入房间
     // 通知房间内人员
     this.sendSysMsg(roomID, { user, msg: '加入了房间' });
-    return { error: false, msg: '加入房间：成功', room: this.roomInfo[roomID] };
+    return { error: false, msg: '加入房间：成功', index, room: this.roomInfo[roomID] };
   }
 
   leaveRoom(socket, user, roomID) {
     log('断开了一个连接', 'socketId=>', socket.id);
     // 从房间名单中移除
     if (!this.roomInfo.hasOwnProperty(roomID)) return;
-    this.cleanRoom();
     socket.leave(roomID); // 退出房间
-    let index = this.roomInfo[roomID].players.indexOf(user);
-    this.roomInfo[roomID].players.splice(index, 1);
+    let room = this.roomInfo[roomID];
+    let remain = 0;
+    room.players = room.players.map((player) => {
+      if (player.name === user) player.active = false;
+      if (player.active) remain++;
+      return player;
+    });
+
+    if (remain <= 0 && room.players.length >= room.numOfPlayers) room.used = true;
     this.sendSysMsg(roomID, { user, msg: '退出了房间', roomID });
+
+    this.cleanRoom();
   }
 
   sendSysMsg(roomID, msg) {
@@ -110,19 +134,8 @@ class Socket {
     let currentTime = new Date().getTime() - 86400000;
     for (let i in this.roomInfo) {
       let room = this.roomInfo[i];
-      if (room.players.length < 1 && (room.used || room.creatAt < currentTime)) delete this.roomInfo[i];
+      if (room.used || room.creatAt < currentTime) delete this.roomInfo[i];
     }
-  }
-
-  getActivePlayers(room) {
-    if (!room) return -1;
-    if (utils.isSting(room)) {
-      if (!this.roomInfo.hasOwnProperty(room)) return -1;
-      room = this.roomInfo[room].players;
-    }
-    if (utils.isObject(room)) room = room.players;
-    if (utils.isArray(room)) return -1;
-    return room.filter((player) => player.active).length;
   }
 }
 
