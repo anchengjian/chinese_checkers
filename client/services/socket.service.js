@@ -17,7 +17,7 @@ export function otherPlayerMove(cb) {
 
 // 根据玩家的对战人数选择房间
 export function getRoom(num, callback) {
-  socket.emit('getRoomByLength', num, function(room) {
+  socket.emit('getRoomByNum', num, function(room) {
     if (room) callback(room);
   });
 }

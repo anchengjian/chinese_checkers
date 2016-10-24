@@ -12,8 +12,10 @@ class Socket {
     this.roomInfo = {
       // roomID: {
       //   id: roomID,
-      //   length: 2,
-      //   players: ['tom', 'jeery']
+      //   numOfPlayers: 2,
+      //   players: [
+      //     { name: 'tom', playerID: 'A', active: true },
+      //   ]
       // }
     };
 
@@ -26,8 +28,8 @@ class Socket {
       log('建立了一个socket的长连接哦', socket.id);
 
       // getRoomIdByLength
-      socket.on('getRoomByLength', (num, callback) => {
-        callback(this.getRoomByLength(num));
+      socket.on('getRoomByNum', (num, callback) => {
+        callback(this.getRoomByNum(num));
       });
 
       // 加入房间
@@ -36,7 +38,7 @@ class Socket {
       socket.on('joinRoom', (data, callback) => {
         user = data.userName;
         roomID = data.roomID;
-        callback(this.joinRoom(socket, user, roomID, ~~data.players));
+        callback(this.joinRoom(socket, user, roomID, ~~data.numofplayers));
       });
 
       // 离开房间
@@ -52,18 +54,18 @@ class Socket {
     });
   }
 
-  getRoomByLength(data) {
+  getRoomByNum(num) {
     for (let i in this.roomInfo) {
       if (!this.roomInfo.hasOwnProperty(i)) continue;
       let room = this.roomInfo[i];
-      if (room.length === data && data > room.players.length) return room;
+      if (room.numOfPlayers === num && num > room.players.length) return room;
     }
-    let newRoom = this.createRoom(data);
+    let newRoom = this.createRoom(num);
     return newRoom;
   }
 
   joinRoom(socket, user, roomID, len) {
-    if (!user || !roomID || !this.roomInfo.hasOwnProperty(roomID) || this.roomInfo[roomID].length !== len) return { error: true, msg: '加入房间：失败' };
+    if (!user || !roomID || !this.roomInfo.hasOwnProperty(roomID) || this.roomInfo[roomID].numOfPlayers !== len) return { error: true, msg: '加入房间：失败' };
     this.roomInfo[roomID].players.push(user); // 将用户昵称加入房间名单中
     socket.join(roomID); // 加入房间
     // 通知房间内人员
@@ -87,12 +89,12 @@ class Socket {
     this.io.to(roomID).emit('sysMsg', msg);
   }
 
-  createRoom(length, players = []) {
-    if (length > 6 || length < 2) return;
+  createRoom(numOfPlayers, players = []) {
+    if (numOfPlayers > 6 || numOfPlayers < 2) return;
     let id = this.getRoomID();
     let creatAt = new Date().getTime();
     let used = false;
-    return this.roomInfo[id] = { id, length, players, creatAt, used };
+    return this.roomInfo[id] = { id, numOfPlayers, players, creatAt, used };
   }
 
   getRoomID() {
@@ -110,6 +112,17 @@ class Socket {
       let room = this.roomInfo[i];
       if (room.players.length < 1 && (room.used || room.creatAt < currentTime)) delete this.roomInfo[i];
     }
+  }
+
+  getActivePlayers(room) {
+    if (!room) return -1;
+    if (utils.isSting(room)) {
+      if (!this.roomInfo.hasOwnProperty(room)) return -1;
+      room = this.roomInfo[room].players;
+    }
+    if (utils.isObject(room)) room = room.players;
+    if (utils.isArray(room)) return -1;
+    return room.filter((player) => player.active).length;
   }
 }
 

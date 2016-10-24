@@ -4,9 +4,9 @@ let endAngle = 2 * Math.PI;
 let anticlockwise = true;
 
 export default class Checkers {
-  constructor(canvas, index, playersLen) {
-    playersLen = ~~playersLen;
-    if (!canvas || !playersLen) return;
+  constructor(canvas, index, numOfPlayers) {
+    numOfPlayers = ~~numOfPlayers;
+    if (!canvas || !numOfPlayers) return;
 
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
@@ -72,7 +72,7 @@ export default class Checkers {
       }
     };
     let order = 'ADBECF';
-    order.substr(0, playersLen).split('').forEach((playerID) => {
+    order.substr(0, numOfPlayers).split('').forEach((playerID) => {
       this.current.players[playerID] = {
         playerID: playerID,
         countSteps: 0,

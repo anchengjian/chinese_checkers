@@ -16,15 +16,15 @@ export default class StartComponent extends Component {
 
     this.parameToGame = {
       roomID: '',
-      players: '',
+      numofplayers: '',
       getLink() {
-        return `/game/?roomID=${this.roomID}&players=${this.players}`;
+        return `/game/?roomID=${this.roomID}&numofplayers=${this.numofplayers}`;
       }
     };
 
     this.setNum = (ev) => {
       let val = typeof ev === 'number' ? ev : ~~ev.target.value;
-      this.parameToGame.players = val;
+      this.parameToGame.numofplayers = val;
       // change roomID
       getRoom(val, (room) => {
         this.parameToGame.roomID = room.id;
