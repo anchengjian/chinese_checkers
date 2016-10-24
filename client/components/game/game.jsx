@@ -31,7 +31,7 @@ export default class GameComponent extends Component {
       console.log(msg);
       if (!msg || msg.error || !msg.room || msg.index < 0) return this.props.history.pushState(null, '/');
       // 开始游戏，互传消息
-      this.checkerGame = new Checkers(this.refs.gameCanvas, msg.index, data.numofplayers);
+      this.checkerGame = new Checkers(this.refs.gameCanvas, msg.index, data.numOfPlayers);
 
       this.checkerGame.palyerMove = (ev, piece) => {
         sendMsg(this.checkerGame.current.playerID, [ev, piece]);

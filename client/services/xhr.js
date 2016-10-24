@@ -6,7 +6,7 @@ export default function xhr(path, options) {
   let config = Object.assign({}, xhrConfig, options);
   let input = serverHost + path;
 
-  return window.fetch(input, config)
+  return fetch(input, config)
     .then((resp) => {
       // if (resp.headers.get('content-type').indexOf('json') >= 0)
       try {

@@ -14,10 +14,12 @@ const isDev = process.argv[2] === '--hot';
 process.env.NODE_ENV = isDev ? 'development' : 'production';
 
 const src = path.resolve(__dirname, '../client');
+let appEntry = ['whatwg-fetch', './client/app.jsx'];
+if (isDev) appEntry.unshift('webpack/hot/dev-server');
 
 let config = {
   entry: {
-    app: isDev ? ['webpack/hot/dev-server', './client/app.jsx'] : ['./client/app.jsx']
+    app: appEntry
   },
   resolve: {
     extensions: ['', '.js', '.jsx', '.json', 'scss', 'html'],
@@ -78,10 +80,6 @@ let config = {
       context: __dirname,
       manifest: manifest
     }),
-    // new webpack.ProvidePlugin({
-    //   React: 'react',
-    //   ReactDOM: 'react-dom'
-    // }),
     new ExtractTextPlugin('css/[name].css')
   ]
 };

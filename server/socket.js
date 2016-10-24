@@ -38,7 +38,7 @@ class Socket {
       socket.on('joinRoom', (data, callback) => {
         user = data.userName;
         roomID = data.roomID;
-        callback(this.joinRoom(socket, user, roomID, ~~data.numofplayers));
+        callback(this.joinRoom(socket, user, roomID, ~~data.numOfPlayers));
       });
 
       // 离开房间
