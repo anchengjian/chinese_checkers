@@ -59,38 +59,10 @@ export default class Checkers {
       }
     };
 
-    // 当前的数据存放池
-    this.current = {
-      // 当前被选中激活的棋子
-      piece: null,
-      // 当前有权限走棋的玩家
-      playerID: '',
-      ownerID: '',
-      // 所有参与的玩家
-      players: {
-        // 'A': {
-        //   playerID: 'A',
-        //   countSteps: 0
-        // }
-      },
-      order: [],
-      cango: []
-    };
-    let defOrder = 'ADBECF';
-    this.current.order = defOrder.substr(0, numOfPlayers).split('').sort();
-    this.current.order.forEach((playerID) => {
-      this.current.players[playerID] = {
-        playerID: playerID,
-        countSteps: 0
-      };
-    });
-    // 默认A玩家，即先进入游戏的玩家先走
-    this.current.playerID = defOrder.substr(0, 1);
-    this.current.ownerID = defOrder.substr(ownerIndex, 1);
-
     // 棋盘的坐标
     this.pos = {
-      // {
+      // '1-5': {
+      //   ID: '1-5',
       //   x: 1,  // 跳棋坐标系x
       //   y: 5,  // 跳棋坐标系y
       //   _x: 0,  // 实际上的垂直坐标系的x
@@ -99,14 +71,41 @@ export default class Checkers {
       // }
     };
 
-    this.init();
+    this.init(ownerIndex, numOfPlayers);
   }
 
-  init() {
+  init(ownerIndex, numOfPlayers) {
+    // 当前的数据存放池
+    this.current = {
+      // 当前被选中激活的棋子
+      piece: null,
+      // 当前有权限走棋的玩家
+      playerID: '',
+      ownerID: '',
+      // 所有参与的玩家
+      // players: {
+      //   'A': {
+      //     playerID: 'A',
+      //     countSteps: 0
+      //   }
+      // },
+      order: [],
+      cango: []
+    };
+    let defOrder = 'ADBECF';
+    this.current.order = defOrder.substr(0, numOfPlayers).split('').sort();
+
+    // 默认A玩家，即先进入游戏的玩家先走
+    this.current.playerID = defOrder.substr(0, 1);
+    this.current.ownerID = defOrder.substr(ownerIndex, 1);
+
     this.drawBoard();
-    for (let playerID in this.current.players) {
+
+    this.current.order.forEach((playerID) => {
+      // this.current.players[playerID] = { playerID, countSteps: 0 };
       this.initPlayer(playerID);
-    }
+    });
+
     this.initEvents();
   }
 
