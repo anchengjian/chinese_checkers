@@ -280,6 +280,7 @@ export default class Checkers {
     // this.setFill(targetPiece, this.current.piece);
     // this.clearFill(this.current.piece);
     let oldPos = this.current.piece;
+    targetPiece.playerID = oldPos.playerID;
     this.fillArc(targetPiece._x, targetPiece._y, this.config.players[oldPos.playerID].color);
     this.cleanArc(this.current.piece._x, oldPos._y);
     delete this.pos[oldPos.ID].playerID;
@@ -324,6 +325,7 @@ export default class Checkers {
 
   getPosByCanMove(piece) {
     let res = [];
+    if (!this.isFilled(piece)) return res;
     // 常量得出方式见文档
     let directionVector = [{ x: -1, y: -1 }, { x: 0, y: -1 }, { x: 1, y: 0 }, { x: 1, y: 1 }, { x: 0, y: 1 }, { x: -1, y: 0 }];
     let mid, end = false;

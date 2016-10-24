@@ -38,7 +38,6 @@ export default class GameComponent extends Component {
       };
 
       otherPlayerMove((player, move) => {
-        console.log(player, this.checkerGame.current.playerID);
         if (player === this.checkerGame.current.playerID) return;
         this.checkerGame.clickHandle(...move);
       });
