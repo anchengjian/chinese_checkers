@@ -199,7 +199,6 @@ export default class Checkers {
 
   // canvas 中的点击事件回调
   clickHandle(ev, piece) {
-
     let isOtherPlayer = false;
     if (piece) {
       isOtherPlayer = true;
@@ -216,6 +215,12 @@ export default class Checkers {
     // 如果没有获得真实可用的坐标则退出
     if (!piece) return;
 
+    // move logic && callback
+    this.move(piece, isOtherPlayer);
+    if (!isOtherPlayer && typeof this.palyerMove === 'function') this.palyerMove(ev, piece);
+  }
+
+  move(piece, isOtherPlayer) {
     // 复杂的逻辑，哈哈，见文档流程图
     if (this.current.piece) {
       let isLegalMove = this.current.cango.findIndex(v => v.ID === piece.ID);
@@ -237,7 +242,11 @@ export default class Checkers {
           this.setActive(piece);
           this.current.cango = this.getPosByCanMove(piece);
         } else {
-          this.clearActive();
+          if (this.current.cango.length > 0) {
+            this.nextPlayer();
+          } else {
+            this.clearActive();
+          }
         }
       }
     } else {
@@ -249,8 +258,6 @@ export default class Checkers {
       }
     }
 
-    // callback
-    if (!isOtherPlayer && typeof this.palyerMove === 'function') this.palyerMove(ev, piece);
   }
 
   // 设置激活，黑圈圈的高亮
