@@ -49,7 +49,7 @@ class Socket {
       // 游戏移动棋子的状态中转
       socket.on('selfMove', (data) => {
         log('收到一个玩家的运动', data);
-        this.io.to(roomID).emit('otherMove', data);
+        socket.broadcast.in(roomID).emit('otherMove', data);
       });
     });
   }

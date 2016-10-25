@@ -207,7 +207,7 @@ export default class Checkers {
     } else {
       let point = this.getPointByEvent(ev);
       piece = this.getPieceByPoint(point);
-      // 自己的点击操作，禁止动别人的棋子
+      // 禁止动别人的棋子
       let isFill = this.isFilled(piece);
       if (isFill && isFill.playerID !== this.current.playerID) return;
     }
@@ -216,11 +216,11 @@ export default class Checkers {
     if (!piece) return;
 
     // move logic && callback
-    this.move(piece, isOtherPlayer);
+    this.move(piece);
     if (!isOtherPlayer && typeof this.palyerMove === 'function') this.palyerMove(ev, piece);
   }
 
-  move(piece, isOtherPlayer) {
+  move(piece) {
     // 复杂的逻辑，哈哈，见文档流程图
     if (this.current.piece) {
       let isLegalMove = this.current.cango.findIndex(v => v.ID === piece.ID);
