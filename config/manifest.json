@@ -292,6 +292,7 @@
     "../node_modules/to-array/index.js": 289,
     "../node_modules/warning/browser.js": 290,
     "../node_modules/webpack/buildin/amd-options.js": 291,
-    "../node_modules/wtf-8/wtf-8.js": 292
+    "../node_modules/whatwg-fetch/fetch.js": 292,
+    "../node_modules/wtf-8/wtf-8.js": 293
   }
 }

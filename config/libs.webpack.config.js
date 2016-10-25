@@ -13,7 +13,7 @@ fs.writeFile(indexPath, indexFile, 'utf-8');
 
 module.exports = {
   entry: {
-    libs: ['react', 'react-dom', 'react-router', 'redux', 'react-redux', 'socket.io-client']
+    libs: ['react', 'react-dom', 'react-router', 'redux', 'react-redux', 'socket.io-client', 'whatwg-fetch']
   },
   output: {
     publicPath: './',
