@@ -289,7 +289,7 @@ export default class Checkers {
     this.fillArc(newPos._x, newPos._y, this.config.players[oldPos.playerID].color);
     this.cleanArc(this.current.piece._x, oldPos._y);
 
-    this.history.push({ playerID: this.current.playerID, oldPos, newPos });
+    this.history.push({ playerID: this.current.playerID, old: oldPos.ID, new: newPos.ID });
     delete this.pos[oldPos.ID].playerID;
   }
 
